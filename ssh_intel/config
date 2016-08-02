@@ -1,0 +1,23 @@
+host git-ger-5.devtools.intel.com
+user fanghu1x
+port 29418
+
+host android-mirror-sh.devtools.intel.com
+port 29418
+user fanghu1x
+StrictHostKeyChecking no
+
+host android.intel.com
+port 29418
+user fanghu1x
+
+host jfumg-gcrmirror.jf.intel.com
+port 29418
+user fanghu1x
+StrictHostKeyChecking no
+
+host shsrv888.sh.intel.com
+port 29418
+user fanghu1x
+
+

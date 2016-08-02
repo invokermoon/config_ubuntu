@@ -1,0 +1,4 @@
+syntax keyword Todou  TODO contained
+syntax match   Comment "//.*"  contains=Todou
+
+hi link Comment Comment

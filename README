@@ -1,0 +1,9 @@
+author:M.hui
+Auto config ubuntu:
+	bashrc
+	vim
+	ssh
+	gitconfig
+	samba
+	base_software
+	terminal-tab

@@ -1,0 +1,46 @@
+#!/bin/bash
+
+do_mapfile(){
+echo "FLASH-----"
+findmap $mapfile .text ${keyword}
+findmap $mapfile .rodata $keyword
+findmap $mapfile .ctors $keyword
+findmap $mapfile .test_cmds $keyword
+echo "RAM-----"
+findmap $mapfile .data $keyword
+findmap $mapfile .bss $keyword
+findmap $mapfile COMMON $keyword
+findmap $mapfile .seg_rxtx $keyword
+findmap $mapfile .noinit $keyword
+echo "DCCM-----"
+findmap $mapfile .dccm $keyword
+}
+
+
+mapfile=./out/current/atlaspeak/arc/vxmicro/nanokernel.map
+elffile=./out/current/atlaspeak/arc/vxmicro/nanokernel.elf
+linkerfile=./out/current/atlaspeak/arc/vxmicro/linker.cmd
+
+#keyword="alg_bft alg_bpf alg_gen alg_hr alg_lrls alg_matrix alg_nn alg_optic alg_ref_lms alg_rls alg_util"
+#echo "=====================OHRM====================="
+#do_mapfile
+
+cat $linkerfile
+readelf -S $elffile
+
+keyword="activity"
+echo "=====================activity====================="
+do_mapfile
+
+keyword="simpleges"
+echo "=====================simpleges====================="
+do_mapfile
+
+keyword="tapping_atp"
+echo "=====================tapping====================="
+do_mapfile
+
+keyword="alg_"
+echo "=====================alg_====================="
+do_mapfile
+

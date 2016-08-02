@@ -1,0 +1,18 @@
+#!/bin/bash
+
+do_mapfile(){
+echo "---------------------FLASH---------------------"
+./findmap $mapfile .text ${keyword}
+./findmap $mapfile .rodata $keyword
+echo "----------------------RAM----------------------"
+./findmap $mapfile .data $keyword
+./findmap $mapfile .bss $keyword
+}
+
+
+mapfile=$1
+keyword=$2
+echo "==========================================================================================="
+do_mapfile
+echo "==========================================================================================="
+

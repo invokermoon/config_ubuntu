@@ -1,0 +1,31 @@
+#!/bin/bash
+
+do_mapfile(){
+echo "---------------------FLASH---------------------"
+findmap $mapfile .text ${keyword}
+findmap $mapfile .rodata $keyword
+echo "----------------------RAM----------------------"
+findmap $mapfile .data $keyword
+findmap $mapfile .bss $keyword
+}
+
+
+mapfile=$1
+rd_zhiqiang="feature_ext gesturespotting mathcontext movementdetection recognition templatematching gesturepersonalize"
+sensor_core_service="sensor_svc_sensor_core.o svc_platform_arc.o sensor_svc.o sensor_svc_api.o sensor_svc_list.o sensor_svc_utils.o sensor_svc_test.o sensor_svc_test_api.o"
+psh_sensor_core="cmd_enginer.o options.o plat_sensors.o bist.o event.o helper.o async_phy.o sensor_phy.o cs_port.o evt_port.o gs_port.o runtime.o sc_exposed.o sensor_evt.o sensor_mgnt.o 
+threading.o timer_evt.o ACCEL_PHY_drv.o accel_phy.o fpga_options.o activity.o simpleges.o pedometer.o"
+physical_sensor_api="phy_sensor_api.o phy_sensor_drv_api.o board_config.o"
+bmi_160="bmi160_bus.o bmi160_drv.o bmi160_gpio.o bmi160_support.o"
+user_defined_gesture="feature_ext.o gesturespotting.o movementdetection.o pat_rec.o recognition.o templatematching.o"
+Stepcounter_activity="alg_accel_features.o alg_body_iq.o alg_locomotion.o alg_nn.o alg_sleep_onset.o alg_util.o alg_bike.o alg_gen.o alg_matrix.o alg_run.o alg_steps_nn.o atp_act.o"
+Tapping="tapping.o tapping_atp.o"
+Flickr_shake="simpleges_atp.o simpleges.o mathcontext.o"
+#keyword=$2
+
+for keyword in $sensor_core_service
+do
+echo "==========================================================================================="
+do_mapfile
+echo "==========================================================================================="
+done

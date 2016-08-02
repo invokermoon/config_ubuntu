@@ -1,0 +1,45 @@
+[review "https://git-ger-5.devtools.intel.com/gerrit"]
+	username = fanghu1x
+
+[review "https://android.intel.com"]
+	username = fanghu1x
+
+[url "ssh://fanghu1x@android.intel.com:29418/"]
+    insteadOf=git://android.intel.com/
+    insteadOf=ssh://android.intel.com/
+    insteadOf=ssh://android.intel.com:29418/
+
+[url "ssh://fanghu1x@android.intel.com:29418/"]
+    pushInsteadOf=git://android.intel.com/
+    pushInsteadOf=ssh://android.intel.com/
+    pushInsteadOf=ssh://android.intel.com:29418/
+
+    pushInsteadOf=ssh://jfumg-gcrmirror.jf.intel.com/
+    pushInsteadOf=ssh://jfumg-gcrmirror.jf.intel.com:29418/
+    pushInsteadOf=ssh://android-mirror.devtools.intel.com/
+    pushInsteadOf=ssh://android-mirror.devtools.intel.com:29418/
+    pushInsteadOf=ssh://android-mirror-sh.devtools.intel.com/
+    pushInsteadOf=ssh://android-mirror-sh.devtools.intel.com:29418/
+
+[url "ssh://fanghu1x@android-mirror-sh.devtools.intel.com:29418/"]
+    insteadOf=git://android.intel.com/
+    insteadOf=ssh://android.intel.com/
+    insteadOf=ssh://android.intel.com:29418/
+    insteadOf=git://android-mirror-sh.devtools.intel.com/
+    insteadOf=ssh://android-mirror-sh.devtools.intel.com/
+    insteadOf=git://android-mirror.devtools.intel.com/
+    insteadOf=ssh://android-mirror.devtools.intel.com/
+    insteadOf=ssh://android-mirror.devtools.intel.com:29418/
+    insteadOf=git://jfumg-gcrmirror.jf.intel.com/
+    insteadOf=ssh://jfumg-gcrmirror.jf.intel.com/
+    insteadOf=ssh://jfumg-gcrmirror.jf.intel.com:29418/
+
+[url "~/git-repo.git"]
+    insteadOf=https://gerrit.googlesource.com/git-repo
+[user]
+	email = huix.fang@intel.com
+	name =Huix Fang
+[color]
+	ui = auto
+[core]
+	editor = vim

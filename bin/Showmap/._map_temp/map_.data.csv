@@ -1,0 +1,4 @@
+Map file:/home/sherlock/workspace/ndg/repo/altas_repo/Master-at-repo/out/curie_reference_crb_debug/quark_se/quark/zephyr/microkernel.map
+Section:.data contain keywords: sensor_svc_clb_props.o
+
+txt_section                             ,txt_addr                                ,txt_size  ,value_size,txt_file

@@ -1,0 +1,62 @@
+diff --git a/config.sh b/config.sh
+old mode 100644
+new mode 100755
+index 4814aa1..9c9aa8e
+--- a/config.sh
++++ b/config.sh
+@@ -19,18 +19,18 @@ config_vim()
+ config_ssh()
+ {
+ 	if [ -d $user_home/.ssh ];then
+-		echo -e "\033[32m[ssh is exist,we back up it to $backup_dir/ssh_bak"
++		echo -e "\033[32m	[ssh is exist,we back up it to $backup_dir/ssh_bak"
+ 		cp $user_home/.ssh $backup_dir/ssh_bak -rf
+ 	fi
+ 	ssh_home="$user_home/.ssh"
+ 	mkdir -p $ssh_home
+ 	cp $curdir/ssh/* $ssh_home/ -rf
+-	ssh-add
++	echo -e "\033[32m	You should enable ssh by\033[0m \033[31mssh-add\033[0m"
+ 	echo -e "\033[32m[$FUNCNAME have been configured]\033[0m"
+ }
+ config_git()
+ {
+-	if [ -f $user_home/.gitconfig];then
++	if [ -f $user_home/.gitconfig ];then
+ 		echo -e "\033[32m[gitconfig is exist,we back up it to $backup_dir/gitconfig_bak]\033[0m"
+ 		cp $user_home/.gitconfig $backup_dir/gitconfig_bak
+ 	fi
+@@ -42,6 +42,10 @@ config_git()
+ config_bin()
+ {
+ 	bin_home="$user_home/bin"
++	if [ ! -d $bin_home ]
++	then
++		mkdir -p $bin_home
++	fi
+ 	cp $curdir/bin/*  $bin_home/ -rf
+ 	echo -e "\033[32m[$FUNCNAME have been configured]\033[0m"
+ }
+@@ -96,7 +100,7 @@ config_bashrc()
+ {
+ 	ret=`grep -rn "Beginning of sherlock" $user_home/.bashrc|wc -l`
+ 	if [ $ret -ne 0 ]; then
+-		echo "\033[31m[bashrc have been configured]\033[0m"
++		echo -e "\033[31m[bashrc had been configured,ignore this time]\033[0m"
+ 		return
+ 	fi
+ cat >>$user_home/.bashrc  <<EOF
+@@ -232,10 +236,10 @@ is_user_valid()
+ 
+ config_terminal_tab_color()
+ {
+-	ret=`cat /etc/issue | awk {$a=substr($2,0,5); print$a}`
+-	if [ `echo "$ret < 12.04"|bc` -ne 0 ];
++	ret=`cat /etc/issue|awk '{print substr($2,0,5)}'`
++	if [ `echo "$ret > 12.04"|bc` -eq 0 ]
+ 	then
+-		echo "\033[31m[Less than 12.04:[\033[0m"
++		echo -e "\033[31m[Less than 12.04:]\033[0m"
+ 		echo -e "\033[31m	You should refer to:http://ubuntuforums.org/showthread.php?t=2038854\033[0m"
+ 		echo -e "\033[31m	Modify:/usr/share/themes/Ambiance/gtk-3.0/gtk-widgets.css\033[0m"
+ 		return

@@ -1,0 +1,85 @@
+# vim: foldmarker=<([{,}])> foldmethod=marker
+define host
+handle SIG38 nostop noprint pass
+end
+
+define peer
+set $peer_tmp = *((unsigned int*) $ebp + 1)
+# b uart_ipc_message_cback, then get 0x4001f69f from stack.
+if $peer_tmp == 0x4001f69f
+	printf "tx sent\n"
+	p ipc_uart_tx_hdr
+	x/7x $ebp
+	set $peer_tmp1 = *((unsigned int*) $ebp + 5)
+	set $peer_tmp2 = *((unsigned int*) $ebp + 6)
+	x/2x &ipc_uart_tx_hdr
+	printf "x/%dx 0x%x\n", $peer_tmp1 / 4, $peer_tmp2
+	set $msg = (struct cfw_message*) $peer_tmp2
+else
+	printf "rx received\n"
+	p ipc_uart_rx_hdr
+	x/7x $ebp
+	set $peer_tmp1 = *((unsigned int*) $ebp + 5)
+	set $peer_tmp2 = *((unsigned int*) $ebp + 6)
+	x/2x &ipc_uart_rx_hdr
+	printf "x/%dx 0x%x\n", $peer_tmp1 / 4, $peer_tmp2
+	set $msg = (struct cfw_message*) $peer_tmp2
+end
+end
+
+define bug
+b ble_gatts_send_notif
+end
+
+define hub
+b uart_ipc_message_cback
+end
+
+define msg
+set $tmp = *(((int*) $ebp) + 2)
+set $msg = (struct cfw_message*) $tmp
+p *$msg
+end
+
+define arc
+set logging overwrite
+set logging file log.gdb
+set logging off
+target remote 127.0.0.1:1234
+file out/current//quark_se/arc/zephyr/nanokernel.elf
+b main
+end
+
+define lmt
+set logging overwrite
+set logging file log.gdb
+set logging off
+target remote 127.0.0.1:4321
+file out/current/quark_se/quark/zephyr/microkernel.elf
+b main_task
+end
+
+define nn
+set logging overwrite
+set logging file log.gdb
+set logging off
+target exec out/current/firmware/emulator
+file out/current/firmware/emulator
+set args -m 32 -cpu qemu32 -M ctb_arc -no-reboot -nographic -net none -clock dynticks -no-acpi -balloon none -no-hpet -nodefaults -serial mon:stdio -serial pty -no-kvm -kernel out/current/firmware/arc.elf
+b main
+handle SIG38 nostop noprint pass
+r
+end
+
+# set args -m 32 -cpu qemu32 -no-reboot -nographic -net none -clock dynticks -no-acpi -balloon none -no-hpet -nodefaults -serial mon:stdio -serial pty -no-kvm -kernel out/current/atlaspeak/lakemont/vxmicro/microkernel.elf -device ivshmem,size=4,shm=atlaspeak  # -S -gdb tcp::4321
+define mm
+set logging overwrite
+set logging file log.gdb
+set logging off
+target exec out/current/firmware/emulator
+file out/current/firmware/emulator
+set args -m 32 -cpu qemu32 -no-reboot -nographic -net none -clock dynticks -no-acpi -balloon none -no-hpet -nodefaults -serial mon:stdio -serial pty -no-kvm -kernel out/current/firmware/quark.elf  # -S -gdb tcp::4321
+b main
+handle SIG38 nostop noprint pass
+r
+end

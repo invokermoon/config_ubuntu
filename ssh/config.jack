@@ -1,0 +1,156 @@
+#host gdk-source.pndk.com
+#	port 29417
+#	user fanghu1X
+
+#host 140.112.29.205
+#	port 29417
+#	user fanghu1X
+
+host android-secure.intel.com android-secure
+	port 29418
+	IdentitiesOnly yes
+	user fanghu1X
+
+#host tf-ccr1
+#	hostname git-ccr-1.devtools.intel.com
+host git-ccr-1.devtools.intel.com
+	port 29418
+	#IdentityFile /home/fanghu1X/.ssh/id_rsa
+	user fanghu1X
+
+host jfumgrepo1.jf.intel.com jfumgrepo1
+	port 29418
+	user fanghu1X
+
+#host jfumgrepo1.jf.intel.com jfumgrepo1
+#	port 8080
+#	user fanghu1X
+
+#host android.intel.com android
+#	port 29418
+#	user fanghu1X
+
+host otc-android.intel.com android
+	port 29418
+	user fanghu1X
+
+#host android.intel.com android
+#	port 8080
+#	user fanghu1X
+
+host umgsw-gcr-hc.jf.intel.com
+	port 29418
+	user fanghu1X
+
+#host umgsw-gcr-hc.jf.intel.com
+#	port 22
+#	IdentityFile /home/fanghu1X/.ssh/id_dsa.pub
+#	IdentitiesOnly yes
+#	user gerrit
+
+host mtgdev.jf.intel.com mtgdev
+	user absp
+#
+host git.sh.intel.com git
+	user umgumse
+
+host shumg001.sh.intel.com shumg001
+	user umgumse
+host borqsgit.8800.org borqsgit
+        user i001
+
+# Specify username for gerrit repo command
+host android.git.kernel.org
+	#ProxyCommand connect-proxy -s %h %p
+	ProxyCommand connect -S proxy.jf.intel.com:1080 %h %p
+	port 29418
+	#IdentityFile /home/fanghu1X/.ssh/dsa_ssh2.pub
+	IdentityFile /home/fanghu1X/.ssh/id_rsa.pub
+	IdentitiesOnly yes
+	user fanghu1X
+	#LogLevel DEBUG3
+
+# Specify username for gerrit repo command
+host review.source.android.com
+	#ProxyCommand connect-proxy -s %h %p
+	ProxyCommand connect -S proxy.jf.intel.com:1080 %h %p
+	port 29418
+	#IdentityFile /home/fanghu1X/.ssh/dsa_ssh2.pub
+	IdentityFile /home/fanghu1X/.ssh/id_rsa.pub
+	IdentitiesOnly yes
+	user fanghu1X
+	#LogLevel DEBUG3
+	
+# Specify username for android mirror servers in OR
+host umse-sl-gcrmirror3.jf.intel.com umse-sl-gcrmirror4.jf.intel.com
+	#ProxyCommand connect-proxy -s %h %p
+	#ProxyCommand connect -S proxy.jf.intel.com:1080 %h %p
+	#port 29418
+	#IdentityFile /home/fanghu1X/.ssh/dsa_ssh2.pub
+	IdentityFile /home/fanghu1X/.ssh/id_rsa_jfumgrepo1.pub
+	#IdentitiesOnly yes
+	user git
+	#LogLevel DEBUG3
+	
+# Specify username for android mirror servers in OR
+host android.intel.com
+        port 29418
+	#ProxyCommand connect-proxy -s %h %p
+	#ProxyCommand connect -S proxy.jf.intel.com:1080 %h %p
+	#port 29418
+	#IdentityFile /home/fanghu1X/.ssh/dsa_ssh2.pub
+	#IdentityFile /home/fanghu1X/.ssh/id_rsa.pub
+        user fanghu1X
+	##IdentityFile /home1/fanghu1X/.ssh/xiaojing/id_rsa.pub
+	##user xli120X
+	#IdentitiesOnly yes
+	#LogLevel DEBUG3
+
+host shlabacsbb06.sh.intel.com
+	port 29418
+	user fanghu1X
+
+host jfumg-gcrmirror.jf.intel.com
+	port 29418
+	user fanghu1X
+
+host mcg-psi-gcrmirror1.sh.intel.com
+	user fanghu1X
+	port 29418
+#	StrictHostKeyChecking no
+
+host mcg-psi-gcrmirror2.sh.intel.com
+	user fanghu1X
+	port 29418
+#	StrictHostKeyChecking no
+
+host mcg-psi-gcr-glb.sh.intel.com
+	user fanghu1X
+	port 29418
+	#UserKnownHostsFile /dev/null
+#	StrictHostKeyChecking no
+#host dualos.sh.intel.com
+#	port 29418
+#	user fanghu1X
+
+host git-ger-5.devtools.intel.com
+	user fanghu1X
+	port 29418
+
+host gerrit-celad.tl.intel.com
+	port 29418
+	user fanghu1X
+
+host imc-gerrit
+	user          fanghu1X
+	hostname      gerrit.rds.intel.com 
+	identityfile  ~/.ssh/jack.ren@intel.com
+	port          29418
+	SendEnv       REPOLOG
+
+host gerrit.rds.intel.com
+	user          fanghu1X
+	hostname      gerrit.rds.intel.com
+	identityfile  ~/.ssh/jack.ren@intel.com
+	port          29418
+	SendEnv       REPOLOG
