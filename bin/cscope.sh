@@ -75,11 +75,11 @@ add_files_recursivly()
     if [ $# -ne 0 ] ; then
         for i in $@;do
             echo "Add files recursivly:"`pwd`/$i
-            find `pwd`/$i -name "*.cmd" -o  -name "*.c" -o -name "*.h" -o -name "Makefile" -o -name "*.go"  -o -name "*conf*" -o -name "*vpf" -o -name "*.S" -o -name "*.s" >> $PWD_PATH/cscope.files
+            find `pwd`/$i -name "*.cmd" -o  -name "*.c" -o -name "*.cpp" -o -name "*.java" -o -name "*.h" -o -name "Makefile" -o -name "*.go"  -o -name "*conf*" -o -name "*vpf" -o -name "*.S" -o -name "*.s" >> $PWD_PATH/cscope.files
         done
     else
         echo "Add:pwd="`pwd`
-        find `pwd` -name "*.cmd" -o  -name "*.c" -o -name "*.h" -o -name "Makefile" -o -name "*.go"-o -name "*conf*" -o -name "*vpf" -o -name "*.S" -o -name "*.s" >> $PWD_PATH/cscope.files
+        find `pwd` -name "*.cmd" -o  -name "*.c"  -o -name "*.cpp"  -o -name "*.java" -o -name "*.h" -o -name "Makefile" -o -name "*.go"-o -name "*conf*" -o -name "*vpf" -o -name "*.S" -o -name "*.s" >> $PWD_PATH/cscope.files
     fi
 }
 
@@ -97,7 +97,7 @@ add_files_under_dirs()
     if [ $# -ne 0 ] ; then
         for i in $@;do
             echo "Add files:"`pwd`/$i
-            find `pwd`/$i -maxdepth 1 -name "*.cmd" -o  -name "*.c" -o -name "*.h" -o -name "Makefile" -o -name "*conf*" -o -name "*vpf" -o -name "*.S" -o -name "*.s" >> $PWD_PATH/cscope.files
+            find `pwd`/$i -maxdepth 1 -name "*.cmd" -o  -name "*.c" -o -name "*.cpp"  -o -name "*.java" -o -name "*.h" -o -name "Makefile" -o -name "*conf*" -o -name "*vpf" -o -name "*.S" -o -name "*.s" >> $PWD_PATH/cscope.files
         done
    fi
 }
@@ -148,6 +148,11 @@ cscope -bkq -i $PWD_PATH/cscope.files
 sync
 if [ $_rm_tags -ne 1 ]
 then
-    ctags -R $@
+   # ctags --c-kinds=+cdefgmnpstuv --c++-kinds=+cdefgmnpstuv  --fields=+iaS --extra=+q  -R $@
+   #ctags -R --c++-kinds=+px --fields=+iaS --extra=+q $@
+   ctags -R --fields=+iaS --extra=+q  $@
+   #ctags -R --c++-kinds=+px --fields=+iaS --extra=+q --language-force=c++  $@
+   #ctags -R --kinds-c++=+p --fields=+iaS --extra=+q --langmap=c++:+.inl .
+   #ctags -R --fields=+iaS --extra=+q --langmap=c++:+.inl $@
 fi
 
