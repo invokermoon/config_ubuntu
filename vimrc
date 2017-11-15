@@ -31,6 +31,7 @@ Plugin 'VundleVim/Vundle.vim'
 "Plugin 'vim-airline/vim-airline'
 Plugin 'bling/vim-airline'
 Plugin 'vim-airline/vim-airline-themes'
+Plugin 'majutsushi/tagbar'
 
 call vundle#end()
 
@@ -66,8 +67,8 @@ set autowrite
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 set tabstop=4
 set shiftwidth=4
-set noexpandtab
-"et expandtab
+"set noexpandtab
+set expandtab
 set smarttab
 "将tab替换为空格
 "nmap tt :%s/\t/ /g<CR>"}}}
@@ -142,7 +143,7 @@ set nocompatible "去掉讨厌的有关vi一致性模式，避免以前版本的
 " 显示中文帮助
 set helplang=cn
 """""""解决consle输出乱码
-language messages zh_CN.utf-8
+"language messages zh_CN.utf-8
 "}}}
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "file type 配置"{{{
@@ -170,15 +171,17 @@ autocmd FileType c set omnifunc=ccomplete#Complete"}}}
 " 进行Taglist的设置<Begin>"{{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 :nmap <silent> <F9> <ESC>:Tlist<RETURN>
-:nmap <F8> :TagbarToggle<CR>
+
+"tagbar setting
+":nmap <F8> :TagbarToggle<CR>
 "map <F9> :TlistToggle<CR>
 "map <F9> :silent! Tlist<CR>             "按下F3就可以呼出了
 "let Tlist_Ctags_Cmd='/usr/bin/ctags'    "因为我们放在环境变量里，所以可以直接执行
 let Tlist_Use_Right_Window=1            "让窗口显示在右边，0的话就是显示在左边
-"let Tlist_Show_One_File=1               "让taglist可以同时展示多个文件的函数列表
+let Tlist_Show_One_File=1               "让taglist可以同时展示多个文件的函数列表
 "let Tlist_File_Fold_Auto_Close=1        "非当前文件，函数列表折叠隐藏
-"let Tlist_Exit_OnlyWindow=1             "当taglist是最后一个分割窗口时，自动推出vim
-"let Tlist_Process_File_Always=0         "是否一直处理tags.1:处理;0:不处理
+let Tlist_Exit_OnlyWindow=1             "当taglist是最后一个分割窗口时，自动推出vim
+let Tlist_Process_File_Always=1         "是否一直处理tags.1:处理;0:不处理
 "let Tlist_Inc_Winwidth=0                "不是一直实时更新tags，因为没有必要"}}}
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "#中括号 大括号 小括号 自动补全"{{{
@@ -526,9 +529,9 @@ endif
 "Vundler Plugin
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "--------------------------------------------------------------------------
-"vim-airline
-"--------------------------------------------------------------------------
-set t_Co=256"{{{
+"vim-airline,状态栏
+"--------------------------------------------------------------------------"{{{
+set t_Co=256
 set laststatus=2
 set lazyredraw
 "let g:airline_theme="molokai"
@@ -536,6 +539,8 @@ let g:airline_theme='powerlineish'
 "打开会乱码
 "let g:airline_powerline_fonts=1
 
+"
+"
 "打开tabline功能,方便查看Buffer和切换,省去了minibufexpl插件
 let g:airline#extensions#tabline#enabled = 1
 let g:airline#extensions#tabline#buffer_nr_show = 4
@@ -551,6 +556,9 @@ let g:airline#extensions#whitespace#symbol = '!'
 let g:airline#extensions#tabline#enabled = 1
 "let g:airline#extensions#tabline#left_sep = ' '
 "let g:airline#extensions#tabline#left_alt_sep = '|'
+"
+"show the func name in airline
+let g:airline#extensions#tagbar#enabled = 1
 
 if !exists('g:airline_symbols')
 	let g:airline_symbols = {}
@@ -574,8 +582,8 @@ let g:airline_symbols.branch = '⎇'
 let g:airline_symbols.readonly = ''
 let g:airline_detect_modified=1
 let g:airline_detect_paste=1
-
 "}}}
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "some delay script
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
