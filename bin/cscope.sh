@@ -1,5 +1,15 @@
 #!/bin/bash
 #* is equal as $@
+color_NONE="\033[m"
+color_RED="\033[0;32;31m"
+color_LIGHT_RED="\033[1;31m"
+color_GREEN="\033[0;32;32m"
+color_BLUE="\033[0;32;34m"
+color_BROWN="\033[0;33m"
+color_YELLOW="\033[1;33m"
+color_WHITE="\033[1;37m"
+
+
 usage()
 {
     echo "$0 {-h} {-d dir} {-R dir}"

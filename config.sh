@@ -1,8 +1,8 @@
 #!/bin/bash
 curdir=`pwd`
-user_name="hui"
-user_home="/home/hui"
-backup_dir="/home/hui/backup_dir"
+user_name="sherlock"
+user_home="/home/sherlock"
+backup_dir="/home/sherlock/backup_dir"
 
 config_vim()
 {
@@ -172,6 +172,13 @@ cleartrash()
 
 #*************************************************
 
+funcs_complete()
+{
+    local cur
+    cur=\${COMP_WORDS[COMP_CWORD]}
+    COMPREPLY=(`global -c \$cur`)
+}
+complete -F funcs_complete global
 
 #Must in the end
 source ~/bin/bashmarks.sh

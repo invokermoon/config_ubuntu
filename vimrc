@@ -32,6 +32,7 @@ Plugin 'VundleVim/Vundle.vim'
 Plugin 'bling/vim-airline'
 Plugin 'vim-airline/vim-airline-themes'
 Plugin 'majutsushi/tagbar'
+Plugin 'vim-scripts/gtags.vim'
 
 call vundle#end()
 
@@ -463,31 +464,136 @@ nmap<M-F11> :q!<CR>"}}}
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "cscope config
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"find . -name "*.h" -o -name "*.c" -o -name "*.cc" > cscope.files
-"cscope -bkq -i cscope.files
-"ctags -R
-"if has("cscope")"{{{
-"    set csprg=/usr/local/bin/cscope
-"    set csto=0
-"    set cst
-"    set cspc=3
-"    "add any database in current dir,and the cscopefile path is definite/absolute
-"    if filereadable("cscope.out")
-"        let cscope_path=matchstr("cscope.out", "./")
-"        cs add cscope.out cscope_path
-"        " else search cscope.out elsewhere
-"    else
-"        let cscope_file=findfile("cscope.out", ".;")
-"        let cscope_pre=matchstr(cscope_file, "../")
-"        "let cscope_pre=matchstr(cscope_file, ".*/")
-"        if !empty(cscope_file) && filereadable(cscope_file)
-"            exe "cs add" cscope_file cscope_pre
-"        endif
-"    endif
-"    set csverb
-"endif"}}}
-if has('cscope')
+function Config_as_cscope(dir)"{{{
+"if has('cscope')
     set csprg=/usr/bin/cscope
+
+    if filereadable(a:dir . 'cscope.out')
+        let cscope_file=findfile('cscope.out', '.;')
+        let cscope_path=matchstr('cscope.out', a:dir)
+        if  !filereadable(cscope_file)
+            echo "[-vim-] NO cscope to be found"
+            return 0
+        endif
+
+        if executable('cscope')
+            echo "[-vim-] cscope is available"
+            echo "[-vim-] Add cscope:". cscope_path . cscope_file
+            exe "cs add" cscope_file cscope_path
+        elseif
+            echo "[-vim-] cscope is disable"
+            return 0
+        endif
+
+    endif
+    if filereadable(a:dir . 'tags')
+        if executable('ctags')
+            echo "[-vim-] ctags is available"
+            execute 'set tags =' . a:dir . 'tags'
+            echo "[-vim-] Add ctags:". a:dir . 'tags'
+        elseif
+            echo "[-vim-] ctags is disable"
+            return 0
+        endif
+    endif
+    return 1
+endfunction"}}}
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"gtags-cscope config
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! FindFiles(pat, ...)"{{{
+     let path = ''
+     for str in a:000
+         let path .= str . ','
+     endfor
+
+     if path == ''
+         let path = &path
+     endif
+
+     echo 'finding...'
+     redraw
+     call append(line('$'), split(globpath(path, a:pat), '\n'))
+     echo 'finding...done!'
+     redraw
+endfunc
+
+function! VimEnterCallback()
+     for f in argv()
+         if fnamemodify(f, ':e') != 'c' && fnamemodify(f, ':e') != 'h'
+             continue
+         endif
+
+         call FindGtags(f)
+     endfor
+endfunc
+
+function! FindGtags(f)
+     let dir = fnamemodify(a:f, ':p:h')
+     while 1
+         let tmp = dir . '/GTAGS'
+         if filereadable(tmp)
+             exe 'cs add ' . tmp . ' ' . dir
+             break
+         elseif dir == '/'
+             break
+         endif
+
+         let dir = fnamemodify(dir, ":h")
+     endwhile
+endfunc
+
+
+function! UpdateGtags(f)
+     let dir = fnamemodify(a:f, ':p:h')
+     exe 'silent !cd ' . dir . ' && global -u &> /dev/null &'
+     echo "[-vim-] update gtags of "a:f
+ endfunction
+
+function Enable_update_gtags()
+    set cscopetag
+    set cscopeprg=gtags-cscope
+    set cscopequickfix=c-,d-,e-,f-,g0,i-,s-,t-
+    nmap <silent> <leader>j <ESC>:cstag <c-r><c-w><CR>
+    nmap <silent> <leader>g <ESC>:lcs f c <c-r><c-w><cr>:lw<cr>
+    nmap <silent> <leader>s <ESC>:lcs f s <c-r><c-w><cr>:lw<cr>
+    "command! -nargs=+ -complete=dir FindFiles :call FindFiles(<f-args>)
+    "au VimEnter * call VimEnterCallback()
+    "au BufAdd *.[ch] call FindGtags(expand('<afile>'))
+    au BufWritePost *.[ch] call UpdateGtags(expand('<afile>'))
+endfunc
+
+function Config_as_gtags(dir)
+    if filereadable(a:dir . 'GTAGS')
+        let cscope_file=findfile('GTAGS', '.;')
+        let cscope_path=matchstr('GTAGS', a:dir)
+        if  !filereadable(cscope_file)
+            echo "[-vim-] NO gtags to be found"
+            return 0
+        endif
+        if executable('gtags-cscope')
+            let g:GtagsCscope_Auto_Load = 1
+            let g:GtagsCscope_Auto_Map = 1
+            let g:GtagsCscope_Absolute_Path = 1
+            set cscopetag
+            set csprg=gtags-cscope
+            call Enable_update_gtags()
+
+            echo "[-vim-] gtags and gtags-cscope is available"
+            echo "[-vim-] Add gtags-cscope:". cscope_path . cscope_file
+            exe "cs add" cscope_file cscope_path
+
+        elseif
+            echo "[-vim-] gtags and gtags-cscope is disable"
+            return 0
+        endif
+
+    endif
+    return 1
+endfunction"}}}
+
+function Tags_config()
     set csto=0
     set cst
     set nocsverb
@@ -497,24 +603,11 @@ if has('cscope')
     let i = 0
     let break = 0
     while isdirectory(dir) && i < max
-        if filereadable(dir . 'cscope.out')
-            let cscope_file=findfile('cscope.out', '.;')
-            let cscope_path=matchstr('cscope.out', dir)
-            if  !filereadable(cscope_file)
-                echo "NO cscope to be found"
-                break
-            endif
-            echo "Add cscope:". cscope_path . cscope_file
-            exe "cs add" cscope_file cscope_path
-            let break = 1
-        endif
-        if filereadable(dir . 'tags')
-            execute 'set tags =' . dir . 'tags'
-            echo "Add tags:". dir . 'tags'
-            "let break = 1
-        endif
+        "let break = Config_as_cscope(dir)
+        let break = Config_as_gtags(dir)
+
         if break == 1
-            echo "break"
+            echo "[-vim-] break"
             let i = 0
             break
         endif
@@ -522,12 +615,10 @@ if has('cscope')
         let i = i + 1
     endwhile
     set  csverb
-endif
+endfunction
 
+call Tags_config()
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"Vundler Plugin
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "--------------------------------------------------------------------------
 "vim-airline,状态栏
 "--------------------------------------------------------------------------"{{{
@@ -603,4 +694,6 @@ match Trail /\s\+$/
 "hi TAB ctermbg=red  guibg=red
 "syn match Trail /\v\*\=/
 "syn match TAB /\t/
+"
+
 
