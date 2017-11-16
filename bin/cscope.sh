@@ -80,7 +80,7 @@ add_files()
     do
         if [ -f $file ] && [ $file = "cscope.files" ] && [ $_clear_cs_files -eq 1 ]
         then
-            echo "[+] clear the cscope.files";
+            echo "[+] clear the $PWD_PATH/cscope.files";
             echo > $PWD_PATH/cscope.files
             break
         fi
@@ -93,10 +93,10 @@ add_files()
             if [ -d $i ] && [ $i = ".git" ]; then
                 echo -e "\033[31m[Please input the right git branch]\033[0m"
                 read git_branch
-                echo "[+] Add [.git][$git_branch] recursivly:"`pwd`/$i
+                echo -e $color_GREEN"[+] Add [.git][$git_branch] recursivly:"$color_NONE`pwd`/$i
                 git ls-tree -r --name-only $git_branch | egrep $git_types | egrep -v $ignore_targets >>$PWD_PATH/cscope.files
             else
-                echo "[+] Add [DIRS] maxdepth>=1 :"`pwd`/$i
+                echo -e $color_GREEN"[+] Add [DIRS] [maxdepth:$maxdepth]:"$color_NONE`pwd`/$i
                 eval find $PWD_PATH/$i $_max_dirdepth -type f $find_types | egrep -sv $ignore_targets >>$PWD_PATH/cscope.files
             fi
         done
@@ -146,6 +146,23 @@ rm_files()
 #}
 #
 
+sort_target_file()
+{
+    sort_file=
+    if [ $# -eq 1 ];then
+        sort_file=$1
+    else
+        sort_file=$PWD_PATH/cscope.files
+    fi
+    echo -e $color_BROWN"[+] sort the file:"$color_NONE$sort_file
+    #Delete the repeat line
+    sort -u $sort_file | tee $PWD_PATH/cscope.tmp >/dev/null 2>&1
+    mv $PWD_PATH/cscope.tmp $sort_file
+    #Remove the space line
+    sed -i '/^$/d' $sort_file
+    sed -i '/^[[:space:]]*$/d' $sort_file
+}
+
 populate_file_list()
 {
     printf "[+] Populating file list...\n"
@@ -163,14 +180,9 @@ populate_file_list()
         exit 0
     fi
 
-    #Delete the repeat line
-    sort -u $PWD_PATH/cscope.files | tee $PWD_PATH/cscope.tmp >/dev/null 2>&1
-    mv $PWD_PATH/cscope.tmp $PWD_PATH/cscope.files
-    #Remove the space line
-    sed -i '/^$/d' $PWD_PATH/cscope.files
-    sed -i '/^[[:space:]]*$/d' $PWD_PATH/cscope.files
+    sort_target_file $PWD_PATH/cscope_files
 
-    printf "[+] Update files OK...\n"
+    printf "[+] Populating files OK...\n"
 }
 
 build_global()
@@ -182,6 +194,7 @@ build_global()
 
 build_ctags()
 {
+    printf "[+] Building ctags database...\n"
     #ctags -L $PWD_PATH/cscope.files
     ctags  -a -R --langmap=c++:+.c   --c++-kinds=+p  --fields=+iaKSz --extra=+q -L $PWD_PATH/cscope.files
     #ctags -R --fields=+iaS --extra=+q  $@
@@ -189,7 +202,7 @@ build_ctags()
 
 build_cscope()
 {
-    printf "[+] Quoting file paths...\n"
+#    printf "[+] Quoting file paths...\n"
 #    sed -i 's/^/"/;s/$/"/' $PWD_PATH/cscope.files
 
     printf "[+] Building cscope database...\n"
@@ -201,8 +214,8 @@ main()
 {
 
     populate_file_list $@
-    #build_global
-    build_ctags
+    build_global
+    #build_ctags
 
     build_cscope
 
