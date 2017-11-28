@@ -33,6 +33,8 @@ Plugin 'bling/vim-airline'
 Plugin 'vim-airline/vim-airline-themes'
 Plugin 'majutsushi/tagbar'
 Plugin 'vim-scripts/gtags.vim'
+"gtags-cscope.vim千万别打开，会导致问题的,比如和F3冲突
+"Plugin 'whatot/gtags-cscope.vim'
 
 call vundle#end()
 
@@ -463,8 +465,9 @@ set autoread
 nmap<M-F11> :q!<CR>"}}}
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "cscope config
+"cscropeprg/csprg：指定执行cscope命令的程序
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function Config_as_cscope(dir)"{{{
+function Reading_cscope_tags(dir)"{{{
 "if has('cscope')
     set csprg=/usr/bin/cscope
 
@@ -501,8 +504,24 @@ endfunction"}}}
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "gtags-cscope config
+" Configure
+" ---------
+" You can use the following variables in $HOME/.vimrc.
+"
+" To use the default key/mouse mapping:
+"	let GtagsCscope_Auto_Map = 1
+" To ignore letter case when searching:
+"	let GtagsCscope_Ignore_Case = 1
+" To use absolute path name:
+"       let GtagsCscope_Absolute_Path = 1
+" To deterring interruption:
+"	let GtagsCscope_Keep_Alive = 1
+" If you hope auto loading:
+"	let GtagsCscope_Auto_Load = 1
+" To use 'vim -t ', ':tag' and '<C-]>'
+"	set cscopetag
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! FindFiles(pat, ...)"{{{
+function! FindFiles(pat, ...)
      let path = ''
      for str in a:000
          let path .= str . ','
@@ -552,9 +571,7 @@ function! UpdateGtags(f)
  endfunction
 
 function Enable_update_gtags()
-    set cscopetag
-    set cscopeprg=gtags-cscope
-    set cscopequickfix=c-,d-,e-,f-,g0,i-,s-,t-
+    "set cscopequickfix=c-,d-,e-,f-,g0,i-,s-,t-
     nmap <silent> <leader>j <ESC>:cstag <c-r><c-w><CR>
     nmap <silent> <leader>g <ESC>:lcs f c <c-r><c-w><cr>:lw<cr>
     nmap <silent> <leader>s <ESC>:lcs f s <c-r><c-w><cr>:lw<cr>
@@ -564,7 +581,7 @@ function Enable_update_gtags()
     au BufWritePost *.[ch] call UpdateGtags(expand('<afile>'))
 endfunc
 
-function Config_as_gtags(dir)
+function Reading_gtags_tags(dir)
     if filereadable(a:dir . 'GTAGS')
         let cscope_file=findfile('GTAGS', '.;')
         let cscope_path=matchstr('GTAGS', a:dir)
@@ -576,7 +593,6 @@ function Config_as_gtags(dir)
             let g:GtagsCscope_Auto_Load = 1
             let g:GtagsCscope_Auto_Map = 1
             let g:GtagsCscope_Absolute_Path = 1
-            set cscopetag
             set csprg=gtags-cscope
             call Enable_update_gtags()
 
@@ -588,23 +604,30 @@ function Config_as_gtags(dir)
             echo "[-vim-] gtags and gtags-cscope is disable"
             return 0
         endif
-
+        return 1
     endif
-    return 1
-endfunction"}}}
+endfunction
 
-function Tags_config()
+function Reading_tags()
+    "csto：命令的查找次序，默认为0，0为从cscope开始，1为从ctags开始
     set csto=0
+    "是否用cscope代替ctags，在需要使用tag文件的时候，比如:tag命令和<C-]>命令
+    "cscopetag=cst
     set cst
+    "是否告之数据库加载结果
     set nocsverb
-    set cspc=3
+    ""cspc decide the length of path
+    set cspc=0
+    "cscopequickfix：设置quickfix窗口里显示的选项，+代表添加到quickfix窗口，-代表清楚上次选项，0代表不添加
+    set cscopequickfix=s0,c0,d0,i0,t0,e0
+
     let max = 4
     let dir = './'
     let i = 0
     let break = 0
     while isdirectory(dir) && i < max
-        "let break = Config_as_cscope(dir)
-        let break = Config_as_gtags(dir)
+        "let break = Reading_cscope_tags(dir)
+        let break = Reading_gtags_tags(dir)
 
         if break == 1
             echo "[-vim-] break"
@@ -617,7 +640,7 @@ function Tags_config()
     set  csverb
 endfunction
 
-call Tags_config()
+call Reading_tags()
 
 "--------------------------------------------------------------------------
 "vim-airline,状态栏

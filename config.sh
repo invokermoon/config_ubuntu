@@ -145,25 +145,43 @@ function title-set() {
 	PS1=\${ORIG}\${TITLE}
 }
 
+color_NONE="\033[m"
+color_RED="\033[0;32;31m"
+color_LIGHT_RED="\033[1;31m"
+color_GREEN="\033[0;32;32m"
+color_BLUE="\033[0;32;34m"
+color_BROWN="\033[0;33m"
+color_YELLOW="\033[1;33m"
+color_WHITE="\033[1;37m"
+
+
 mkdir -p ~/.trash
 alias rm=trash
 alias rl='ls ~/.trash'
 alias ur=undelfile
 undelfile()
 {
+    echo -e \$color_BROWN "Refind the deleted files"\$color_WHITE
 	mv -i ~/.trash/\$@ ./
 }
 trash()
 {
+    local del_files=\$(echo \$@ | sed -n 's/-rf//g;p')
+    echo -e \$color_GREEN"remove the dir:"
+    readlink -f \$del_files
+    echo -e \$color_RED
 	read -p "clear sure?[y/n/trash]" confirm
 	if [ "\$confirm" = 'y'  ] || [ "\$confirm" == 'Y'  ]; then
-		/bin/rm \$@
-	elif [ "\$confirm" = 'n'  ] || [ "\$confirm" == 'N'  ]; then
-		echo "not remove"
-	else
-		mv \$@ ~/.trash
+		/bin/rm \$del_files -rf
+	elif [ "\$confirm" = 'T'  ] || [ "\$confirm" == 't'  ]; then
+		mv \$del_files ~/.trash/
+		echo -e \$color_BROWN"Mv to ~/.trash"\$color_WHITE
+    else
+		echo "Delete failed"
 	fi
+    echo -e \$color_WHITE
 }
+
 cleartrash()
 {
 	read -p "clear sure?[y/n]" confirm
