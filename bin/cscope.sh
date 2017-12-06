@@ -25,7 +25,7 @@ usage()
 
 ignore_targets="bin|tools"
 #find_types="\( -name \*.c -o -name \*.cpp -o -name \*.cc -o -name \*.hpp -o -name \*.h -o -name \*.asm -o -name \*.def \)"
-find_types='-name "*.c" -o -name "*.cpp" -o -name "*.cc"-o -name "*.hpp" -o -name "*.h" -o -name "*.asm" -o -name "*.def"'
+find_types='-name "*.c" -o -name "*.cpp" -o -name "*.dtsi"-o -name "*.hpp" -o -name "*.h" -o -name "*.asm" -o -name "*.dts"'
 find_types1='-name "*.cmd" -o  -name "*.c" -o -name "*.cpp" -o -name "*.java" -o -name "*.h" -o -name "Makefile" -o -name "*.go"  -o -name "*conf*" -o -name "*vpf" -o -name "*.S" -o -name "*.s"'
 git_types=".c$|.cpp$|.h$|.hpp$"
 git_branch=master
@@ -192,11 +192,13 @@ build_global()
     cp -pf GPATH GRTAGS GTAGS $PWD_PATH 2>/dev/null
 }
 
+#如果需要#if 0里面的定义，可以–if0=yes来忽略 #if 0这样的定义。
 build_ctags()
 {
     printf "[+] Building ctags database...\n"
     #ctags -L $PWD_PATH/cscope.files
-    ctags  -a -R --langmap=c++:+.c   --c++-kinds=+p  --fields=+iaKSz --extra=+q -L $PWD_PATH/cscope.files
+    #ctags  -a -R --langmap=c++:+.c   --c++-kinds=+p  --fields=+iaKSz --extra=+q -L $PWD_PATH/cscope.files
+    ctags -I __THROW -I __attribute_pure__ -I __nonnull -I __attribute__ -I inline --file-scope=yes --langmap=c:+.h --languages=c,c++ --links=yes --c-kinds=+p --c++-kinds=+p --fields=+iaS --extra=+q -L $PWD_PATH/cscope.files
     #ctags -R --fields=+iaS --extra=+q  $@
 }
 
