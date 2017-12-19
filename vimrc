@@ -1,53 +1,280 @@
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"Bundler
+"Notes:
+"1.leader is \ default,you can rewrite by: let mapleader=";"
+"2.https://exvim.github.io/docs-zh/plugins/    this website contains all the vim-script
+"3,if you want surfing with C++:https://github.com/Rip-Rip/clang_complete/wiki
+
+
+"Common head setting
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 set nocompatible               " be iMproved
 filetype off                   " required!
+"let mapleader=";" //just a example
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-"git clone https://github.com/gmarik/Vundle.vim.git ~/.vim/bundle/Vundle.vim
-set rtp+=~/.vim/bundle/Vundle.vim
-call vundle#begin()
-" alternatively, pass a path where Vundle should install plugins
-    "let path = '~/some/path/here'
-    "call vundle#rc(path)
 
-" let Vundle manage Vundle required!
-Plugin 'VundleVim/Vundle.vim'
+"Plugins Manage:vim-plugin 最好　其他什么vundle 就是一坨屎
+"How to use vim-plug
+"curl -fLo ~/.local/share/nvim/site/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+"
+call plug#begin('~/.vim/plugged')
 
+"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 " original repos on github
-" github上的用户写的插件，使用这种用户名+repo名称的方式
 "Bundle 'tpope/vim-fugitive'
-"Bundle 'rstacruz/sparkup', {'rtp': 'vim/'}
-"Bundle 'tpope/vim-rails.git'
-
-" vimscripts的repo使用下面的格式，直接是插件名称
-"" vim-scripts repos
-"Bundle 'L9'
-"Bundle 'FuzzyFinder'
-
-"" non github repos
+" non github repos
 "Bundle 'git://git.wincent.com/command-t.git'
-"" ...
+">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+"不确定,not sure
+""<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+"自动识别目前编码
+"Plug 's3rvac/AutoFenc'
+"写文档必备，提示超多信息　只要按一下space在normal mode
+"Plug 'SpaceVim/SpaceVim'
+"记录你每天花了多久编程，分别使用那种语言编程，分别在哪写（git）project里编过程，会把数据同步到WakaTime 路 Quantify your coding，还会每天（或每周）给你发邮件，这个要收费，免费版只保留7天的数据。
+"Plug 'wakatime/vim-wakatime'
+">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+
+"common repos
+"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 "Plugin 'vim-airline/vim-airline'
-Plugin 'bling/vim-airline'
-Plugin 'vim-airline/vim-airline-themes'
-Plugin 'majutsushi/tagbar'
-Plugin 'vim-scripts/gtags.vim'
+"状态栏
+Plug 'bling/vim-airline'
+Plug 'vim-airline/vim-airline-themes'
+
+Plug 'vim-scripts/gtags.vim'
+
+"能在窗口中展示vim撤销记录。
+Plug 'mbbill/undotree'
+Plug 'flazz/vim-colorschemes'
+">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+
+"taglist tagbar
+""<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+"tagbar need ctags,就是显示一些符号变量的
+Plug 'majutsushi/tagbar'
+Plug 'vim-scripts/taglist.vim'
+" 进行Taglist的设置<Begin>"
+" {{{
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+":nmap <silent> <F9> <ESC>:Tlist<RETURN>
+"tagbar setting
+:nmap <F8> :TagbarToggle<CR>
+"map <F9> :TlistToggle<CR>
+"map <F9> :silent! Tlist<CR>             "按下F3就可以呼出了
+"let Tlist_Ctags_Cmd='/usr/bin/ctags'    "因为我们放在环境变量里，所以可以直接执行
+let Tlist_Use_Right_Window=1            "让窗口显示在右边，0的话就是显示在左边
+let Tlist_Show_One_File=1               "让taglist可以同时展示多个文件的函数列表
+"let Tlist_File_Fold_Auto_Close=1        "非当前文件，函数列表折叠隐藏
+let Tlist_Exit_OnlyWindow=1             "当taglist是最后一个分割窗口时，自动推出vim
+let Tlist_Process_File_Always=1         "是否一直处理tags.1:处理;0:不处理
+"let Tlist_Inc_Winwidth=0                "不是一直实时更新tags，因为没有必要"
+"}}}
+">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+
+"查找.search
+""<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+"fzf(option1) using git
+"Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
+"fzf(option2) not using git (recommand)
+"Plug 'junegunn/fzf'
+
+"leaderf(option3): <leader>f
+"模糊查找文件，buffer，tags等，比ctrlp，unite，fzf等好用多了
+Plug 'Yggdroot/LeaderF', { 'do': './install.sh' }
+"{{{
+let g:Lf_ShortcutF = '<leader>lff'
+let g:Lf_ShortcutB = '<leader>lfb'
+nmap <silent> <leader>lft <ESC>:LeaderfTag<CR>
+let g:Lf_Ctags = "/usr/local/bin/gtags"
+"let g:Lf_Ctags = "/usr/bin/ctags"
+"}}}
+"
+">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+
+"窗口插件
+"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+"qucikfix就是我们平常用cscope搜索的窗口　或者有时候编译提示信息的窗口
+"qucikfix是内置插件,当有错误的时候:cw才有用
+"winmanage就是nerdtree这样的文件浏览器,这个早已经被弃用了,没有任何意义
+"minibufexpl 就是我们打开多个文件那个小tab,不需要安装
+"jlanzarotta/bufexplorer 就是我们用的\be那些操作
+Plug 'jlanzarotta/bufexplorer'
+Plug 'scrooloose/nerdtree'
+Plug 'Xuyuanp/nerdtree-git-plugin'
+"NERDTREE:a very simple tree to manage the dir
+"{{{
+map <F3> :NERDTreeToggle<CR>
+imap <F3> <ESC> :NERDTreeToggle<CR>
+"let NERDTreeShowHidden=1
+let NERDTreeShowLineNumbers=1
+let NERDChristmasTree=1
+let NERDTreeHighlightCursorline=1
+let NERDTreeChDirMode=2
+let NERDTreeShowBookmarks=1
+"let NERDTreeQuitOnOpen=1
+" 设置宽度
+let NERDTreeWinSize=31
+" 在终端启动vim时，共享NERDTree
+"let g:nerdtree_tabs_open_on_console_startup=1
+" 忽略某些文件的显示
+let NERDTreeIgnore=['\.o','\.cmd','\*.builtin']
+let g:NERDTreeIndicatorMapCustom = {
+    \ "Modified"  : "✹",
+    \ "Staged"    : "✚",
+    \ "Untracked" : "✭",
+    \ "Renamed"   : "➜",
+    \ "Unmerged"  : "═",
+    \ "Deleted"   : "✖",
+    \ "Dirty"     : "✗",
+    \ "Clean"     : "✔︎",
+    \ "Unknown"   : "?"
+    \ }
+
+:autocmd BufRead,BufNewFile *.dot map <F5> :w<CR>:!dot -Tjpg -o %<.jpg % && eog %<.jpg <CR><CR> && exec "redr!"
+"当打开vim且没有文件时自动打开NERDTree
+autocmd vimenter * if !argc() | NERDTree | endif
+" 只剩 NERDTree时自动关闭
+autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTreeType") && b:NERDTreeType == "primary") | q | endif
+
+"let g:winManagerWindowLayout='FileExplorer'
+"nmap wm :WMToggle<cr>"
+"}}}
+
+">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+"注释插件
+"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+Plug 'scrooloose/nerdcommenter'
+" 注释的时候自动加个空格, 强迫症必配
+
+let g:NERDSpaceDelims=1"{{{
+"Help:
+"<leader>cc   加注释
+"<leader>cu   解开注释
+"<leader>c<space>  加上/解开注释, 智能判断
+"<leader>cy   先复制, 再注解(p可以进行黏贴)
+""}}}
+
+">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+"超级辅助插件
+"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+"括号匹配高亮
+Plug 'luochen1990/rainbow'
+let g:rainbow_active=1"
+
+" Plug 'kien/rainbow_parentheses.vim'
+" "rainbow(高亮括号)
+" {{{
+" let g:rbpt_colorpairs = [
+    " \ ['brown',       'RoyalBlue3'],
+    " \ ['Darkblue',    'SeaGreen3'],
+    " \ ['darkgray',    'DarkOrchid3'],
+    " \ ['darkgreen',   'firebrick3'],
+    " \ ['darkcyan',    'RoyalBlue3'],
+    " \ ['darkred',     'SeaGreen3'],
+    " \ ['darkmagenta', 'DarkOrchid3'],
+    " \ ['brown',       'firebrick3'],
+    " \ ['gray',        'RoyalBlue3'],
+    " \ ['black',       'SeaGreen3'],
+    " \ ['darkmagenta', 'DarkOrchid3'],
+    " \ ['Darkblue',    'firebrick3'],
+    " \ ['darkgreen',   'RoyalBlue3'],
+    " \ ['darkcyan',    'SeaGreen3'],
+    " \ ['darkred',     'DarkOrchid3'],
+    " \ ['red',         'firebrick3'],
+    " \ ]
+" let g:rbpt_max = 16
+" let g:rbpt_loadcmd_toggle = 0"
+" au VimEnter * RainbowParenthesesToggle
+" au Syntax * RainbowParenthesesLoadRound
+" au Syntax * RainbowParenthesesLoadSquare
+" au Syntax * RainbowParenthesesLoadBraces
+" }}}
+
+">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+
+"智能补全　但是我们用C-p来操作的话　最好还是用内置自带的补全,也就是下面都不用打开
+"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+"YCM
+function! BuildYCM(info)
+  " info is a dictionary with 3 fields
+  " - name:   name of the plugin
+  " - status: 'installed', 'updated', or 'unchanged'
+  " - force:  set on PlugInstall! or PlugUpdate!
+  if a:info.status == 'installed' || a:info.force
+    !./install.py
+  endif
+endfunction
+"智能补全
+"Plug 'Valloric/YouCompleteMe', { 'do': function('BuildYCM') }
+"Plug 'Valloric/YouCompleteMe'
+"生成配置文件为YCM
+"Plug 'rdnetto/YCM-Generator', { 'branch': 'stable' }
+
+"SuperTab
+"SuperTab使Tab快捷键具有更快捷的上下文提示功能。也就是一种自动补全插件,有时候跟TAB冲突　尽量不用打开"{{{
+"Plug 'SuperTab'
+"let g:SuperTabRetainCompletionType=2
+" 0 - 不记录上次的补全方式
+" 1 - 记住上次的补全方式,直到用其他的补全命令改变它
+" 2 - 记住上次的补全方式,直到按ESC退出插入模式为止
+"虽然supertab自动补全很好用，但是在normal情况下，是不需要补全的，实现普通缩进的功能就可以了。
+"但是被supertab占用了，tab普通情况下也不能缩进。
+"解决方法很简单:
+":unmap <c-i>
+":nmap <c-i> a空格空格空格空格
+"c-i 在vim中等同于tab  ，相当于先解除普通情况下绑定，然后绑定到输入模式加4个空格
+"}}}
+">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+
+"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+"tabular是一个帮你用像=,,这种符号来对齐一些文本的插件。当你在编写json或者有许多变量的代码 时非常有用
+Plug 'godlygeek/tabular'
+
+"md文件语法高亮和文件类型检测
+Plug 'plasticboy/vim-markdown'
+"Plug 'suan/vim-instant-markdown'"{{{
+"vim-instant-markdown这是一个实时预览的插件，当你用vim打开markdown文档的时候，会自动打开一个浏览器窗口，并且可以实时预览
+"但是必须先安装新版的node.js:
+"sudo add-apt-repository ppa:chris-lea/node.js
+"sudo apt-get update
+"sudo apt-get install nodejs
+"安装完node.js之后安装instant-markdown-d
+"sudo npm -g install instant-markdown-d
+"}}}
+"
+let g:vim_markdown_folding_disabled=1
+let g:vim_markdown_toc_autofit=1
+">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+"其他语言扩展插件
+"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+"C函数的辅助插件
+Plug 'exvim/ex-cref'
+"vim-jsbeautify包括html,css,javascript缩进和语法高亮功能。我没用它所以没有建议
+"Plug 'maksimr/vim-jsbeautify'
+"
+Plug 'fatih/vim-go'
+"vim-autoformat，比如c++，会自动调用诸如astyle, clang-format来对代码进行美化
+Plug 'Chiel92/vim-autoformat'
+
+">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 "gtags-cscope.vim千万别打开，会导致问题的,比如和F3冲突
-"Plugin 'whatot/gtags-cscope.vim'
-
-call vundle#end()
-
-filetype plugin indent on     " required!
+"Plug 'whatot/gtags-cscope.vim'
+">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 "
-" Brief help  -- 此处后面都是vundle的使用命令
-" :BundleList          - list configured bundles
-" :BundleInstall(!)    - install(update) bundles
-" :BundleSearch(!) foo - search(or refresh cache first) for foo
-" :BundleClean(!)      - confirm(or auto-approve) removal of unused bundles
-"
-" see :h vundle for more details or wiki for FAQ
-" NOTE: comments after Bundle command are not allowed..
+"call vundle#end()
+call plug#end()
 
 
 
@@ -171,21 +398,6 @@ autocmd FileType xml set omnifunc=xmlcomplete#CompleteTags
 autocmd FileType php set omnifunc=phpcomplete#CompletePHP
 autocmd FileType c set omnifunc=ccomplete#Complete"}}}
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" 进行Taglist的设置<Begin>"{{{
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-:nmap <silent> <F9> <ESC>:Tlist<RETURN>
-
-"tagbar setting
-":nmap <F8> :TagbarToggle<CR>
-"map <F9> :TlistToggle<CR>
-"map <F9> :silent! Tlist<CR>             "按下F3就可以呼出了
-"let Tlist_Ctags_Cmd='/usr/bin/ctags'    "因为我们放在环境变量里，所以可以直接执行
-let Tlist_Use_Right_Window=1            "让窗口显示在右边，0的话就是显示在左边
-let Tlist_Show_One_File=1               "让taglist可以同时展示多个文件的函数列表
-"let Tlist_File_Fold_Auto_Close=1        "非当前文件，函数列表折叠隐藏
-let Tlist_Exit_OnlyWindow=1             "当taglist是最后一个分割窗口时，自动推出vim
-let Tlist_Process_File_Always=1         "是否一直处理tags.1:处理;0:不处理
-"let Tlist_Inc_Winwidth=0                "不是一直实时更新tags，因为没有必要"}}}
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "#中括号 大括号 小括号 自动补全"{{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -392,27 +604,7 @@ imap <C-a> <Esc>^
 vmap <C-c> "+y
 "去空行
 nnoremap <F2> :g/^\s*$/d<CR>"}}}
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"NERDTree Cooperate with Winmanager"{{{
-"Winmanager:a window that can explore dir
-"NERDTREE:a very simple tree to manage the dir
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-map <F3> :NERDTreeToggle<CR>
-imap <F3> <ESC> :NERDTreeToggle<CR>
-let NERDTreeShowHidden=1
-let NERDTreeShowLineNumbers=1
-let NERDChristmasTree=1
-let NERDTreeHighlightCursorline=1
-let NERDTreeChDirMode=2
-let NERDTreeShowBookmarks=1
-"let NERDTreeQuitOnOpen=1
-:autocmd BufRead,BufNewFile *.dot map <F5> :w<CR>:!dot -Tjpg -o %<.jpg % && eog %<.jpg <CR><CR> && exec "redr!"
-"当打开vim且没有文件时自动打开NERDTree
-autocmd vimenter * if !argc() | NERDTree | endif
-" 只剩 NERDTree时自动关闭
-autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTreeType") && b:NERDTreeType == "primary") | q | endif
-let g:winManagerWindowLayout='FileExplorer'
-nmap wm :WMToggle<cr>"}}}
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "代码格式优化化"{{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
