@@ -2,64 +2,167 @@
 curdir=`pwd`
 user_name="sherlock"
 user_home="/home/sherlock"
-backup_dir="/home/sherlock/backup_dir"
+let first_flag=2
+
+backup_dir="$curdir/backup_dir"
+bashrc_file=$curdir/base_files/bashrc
+bashrc_diff=$curdir/base_files/bashrc.diff
+vimrc_file=$curdir/base_files/vimrc
+vim_dir=$curdir/base_files/vim
+gitconfig_file=$curdir/base_files/gitconfig
+bin_dir=$curdir/base_files/bin
+ssh_dir=$curdir/base_files/ssh
+gtkcss_file=$curdir/base_files/gtk.css
+
+color_none="\033[m"
+color_red="\033[0;32;31m"
+color_light_red="\033[1;31m"
+color_green="\033[0;32;32m"
+color_blue="\033[0;32;34m"
+color_brown="\033[0;33m"
+color_yellow="\033[1;33m"
+color_white="\033[1;37m"
+
+print_result()
+{
+    if [ "$2" == "failed" ]; then
+        printf "[$color_red DIFF $color_white][%-25.25s]============================================================[$color_red failed $color_white]\n\n" $1
+    elif [ "$2" == "ok" ]; then
+        printf "[$color_red DIFF $color_white][%-25.25s]============================================================[$color_green ok $color_white]\n\n" $1
+    elif [ "$2" == "ignore" ]; then
+        printf "[$color_red DIFF $color_white][%-25.25s]============================================================[$color_yellow ignore $color_white]\n\n" $1
+    elif [ "$2" == "same" ]; then
+        printf "[$color_light_red SAME $color_white][%-25.25s]============================================================[$color_green ok $color_white]\n\n" $1
+    else
+        printf "[$color_red DIFF $color_white][%-25.25s]============================================================[$color_red unknow $color_white]\n\n" $1
+        exit
+    fi
+}
+
+skip_this_step()
+{
+    if [ $first_flag == 2 ]; then
+        echo -e "[$color_light_red Auto setting all envs$color_white? yes/no [$color_red no $color_white]]\c"
+        read confirm 
+        if [ "$confirm" = 'y'  ] || [ "$confirm" == 'Y'  ]; then
+            first_flag=1
+        else
+            first_flag=0
+        fi
+    fi
+
+    if [ $first_flag == 0 ]; then
+        #check if diff?
+        if [ ! -z $2 ] && [ ! -z $3 ]; then
+            diff  $2 $3 >/dev/null 2>&1
+            if [ $? == 0 ]; then
+                print_result $1 "same"
+                #skip when same
+                return 1
+            fi
+        fi
+
+        while [ 1 ]; do
+            echo -e "[Execute $color_green$1$color_white? yes/no/check [$color_red no $color_white]]\c"
+            read confirm 
+            if [ "$confirm" = 'y'  ] || [ "$confirm" == 'Y'  ]; then
+                return 0;
+            elif [ "$confirm" = 'c'  ] || [ "$confirm" == 'C'  ]; then
+                if [ ! -z $2 ] && [ ! -z $3 ]; then
+                    git diff  $2 $3
+                else
+                echo -e "No diff files\n"
+                fi
+                continue
+            else
+                print_result $1 "ignore"
+                return 1;
+            fi
+            return 0;
+        done
+    fi
+}
 
 config_vim()
 {
-	if [ -f $user_home/.vimrc ];then
+    skip_this_step $FUNCNAME $vimrc_file $user_home/.vimrc 
+    if [ $? == 1 ] ; then
+       return  
+    fi
+    if [ -f $user_home/.vimrc ]; then
 		echo -e "\033[32m[vimrc is exist,we back up it to $backup_dir/vimrc_bak]\033[0m"
 		cp $user_home/.vimrc $backup_dir/vimrc_bak
 	fi
-	cp $curdir/vimrc $user_home/.vimrc
+	install $vimrc_file $user_home/.vimrc
 	vim_home="$user_home/.vim"
 	mkdir -p  $vim_home
-	cp $curdir/vim/* $vim_home/ -rf
+	cp $vimr_dir/* $vim_home/ -rf
 	#Setup the Vundle
-	git clone https://github.com/gmarik/Vundle.vim.git ~/.vim/bundle/Vundle.vim
-	echo -e "\033[32m[$FUNCNAME have been configured]\033[0m"
+	#git clone https://github.com/gmarik/Vundle.vim.git ~/.vim/bundle/Vundle.vim
 	chown -R $user_name: $user_home/.vimrc
 	chown -R $user_name: $vim_home
+    print_result $FUNCNAME "ok"
 }
 config_ssh()
 {
-	if [ -d $user_home/.ssh ];then
+    skip_this_step $FUNCNAME 
+    if [ $? == 1 ] ; then
+       return  
+    fi
+
+	if [ -d $user_home/.ssh ]; then
 		echo -e "\033[32m	[ssh is exist,we back up it to $backup_dir/ssh_bak"
 		cp $user_home/.ssh $backup_dir/ssh_bak -rf
 	fi
 	ssh_home="$user_home/.ssh"
 	mkdir -p $ssh_home
-	cp $curdir/ssh/* $ssh_home/ -rf
+	cp $ssh_dir/* $ssh_home/ -rf
 	echo -e "\033[32m	You should enable ssh by\033[0m \033[31mssh-add\033[0m"
-	echo -e "\033[32m[$FUNCNAME have been configured]\033[0m"
 	chown -R $user_name: $ssh_home
+    print_result $FUNCNAME "ok"
+
 }
 config_git()
 {
-	if [ -f $user_home/.gitconfig ];then
+    skip_this_step $FUNCNAME $gitconfig_file $user_home/.gitconfig
+    if [ $? == 1 ] ; then
+       return  
+    fi
+
+	if [ -f $user_home/.gitconfig ]; then
 		echo -e "\033[32m[gitconfig is exist,we back up it to $backup_dir/gitconfig_bak]\033[0m"
 		cp $user_home/.gitconfig $backup_dir/gitconfig_bak
 	fi
-	cp $curdir/gitconfig $user_home/.gitconfig
+	cp $gitconfig_file $user_home/.gitconfig
 	cp $curdir/git-repo.git $user_home/		-rf
-	echo -e "\033[32m[$FUNCNAME have been configured]\033[0m"
 	chown -R $user_name:  $user_home/.gitconfig
+    print_result $FUNCNAME "ok"
 }
 
 config_bin()
 {
+    skip_this_step $FUNCNAME $bin_dir/*  $bin_home/
+    if [ $? == 1 ] ; then
+       return  
+    fi
+
 	bin_home="$user_home/bin"
 	if [ ! -d $bin_home ]
 	then
 		mkdir -p $bin_home
 	fi
-	cp $curdir/bin/*  $bin_home/ -rf
-	echo -e "\033[32m[$FUNCNAME have been configured]\033[0m"
+	cp $bin_dir/*  $bin_home/ -rf
 	chown -R $user_name:  $bin_home
+    print_result $FUNCNAME "ok"
 }
 
-create_share_dir()
+create_samba_share_dir()
 {
 	is_user_root;
+    if [ $? == 1 ] ; then
+       return  
+    fi
+
 	echo -e "\033[32m[Create the samba share dir /home/share]\033[0m"
 	mkdir -p /home/share
 	chmod 0777 /home/share
@@ -89,22 +192,69 @@ EOF
 		echo -e "\033[32m	[Create a smb accout named $smb_user,passwd 0 OK]\033[0m"
 	else
 		echo -e "\033[31m	[Create a smb accout named $smb_user,passwd 0 error]\033[0m"
-	fi
-	echo -e "\033[32m[$FUNCNAME have been configured]\033[0m"
+        print_result $FUNCNAME "failed"
+    fi
+    print_result $FUNCNAME "ok"
 }
 
 config_samba()
 {
+    skip_this_step $FUNCNAME
+    if [ $? == 1 ] ; then
+       return  
+    fi
+
 	if [ -f /etc/samba/smb.conf ]; then
-		create_share_dir;
+		create_samba_share_dir;
 	else
 		echo -e "\033[31m[Please apt-get install samba first]\033[0m"
-	fi
-	echo -e "\033[32m[$FUNCNAME have been configured]\033[0m"
+        print_result $FUNCNAME "failed"
+    fi
+    print_result $FUNCNAME "ok"
 }
 
 config_bashrc()
 {
+   skip_this_step $FUNCNAME $user_home/.bashrc $bashrc_file
+    if [ $? == 1 ] ; then
+        return 
+    fi
+    if [ -f $user_home/.bashrc ]; then
+        echo -e "$color_red[$user_home/bashrc is exist,back up it to $backup_dir/bashrc]$color_white"
+        cp $user_home/.bashrc $backup_dir/bashrc
+    else
+        echo -e "$color_red $user_home/bashrc is not exist,error$color_white"
+        print_result $FUNCNAME "failed"
+        return
+    fi
+    DIFF=`diff $user_home/.bashrc $bashrc_file`
+    if [ ! -z "$DIFF" ]; then
+        while [ 1 ]; do
+            echo -e "Copy: $color_BROWN $bashrc_file ---> $color_BROWN $user_home/.bashrc $color_WHITE\n[y/n/check$color_GREEN[no]$color_WHITE]"
+            read confirm
+            if [ "$confirm" == 'y'  ] || [ "$confirm" == 'Y'  ]; then
+                install $bashrc_file $user_home/.bashrc
+                chown -R $user_name: $user_home/.bashrc
+                print_result $FUNCNAME "ok"
+            elif [ "$confirm" = 'c'  ] || [ "$confirm" == 'C'  ]; then
+                diff `$user_home/.bashrc $bashrc_file >$bashrc_diff`
+                continue;
+            else
+                print_result $FUNCNAME "ignore"
+            fi
+            echo "[$DATE]================================================================="
+            break
+        done
+    fi
+}
+
+config_bashrc2()
+{
+    skip_this_step $FUNCNAME
+    if [ $? == 1 ] ; then
+        return 
+    fi
+
 	ret=`grep -rn "Beginning of sherlock" $user_home/.bashrc|wc -l`
 	if [ $ret -ne 0 ]; then
 		echo -e "\033[31m[bashrc had been configured,ignore this time]\033[0m"
@@ -203,7 +353,7 @@ source ~/bin/bashmarks.sh
 #Ending of sherlock!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 EOF
 	source  $user_home/.bashrc
-	echo -e "\033[32m[$FUNCNAME have been configured]\033[0m"
+    print_result $FUNCNAME "ok"
 }
 
 is_user_root()
@@ -216,22 +366,32 @@ is_user_root()
 
 setup_base_tools()
 {
-	is_user_root;
-	echo -e "\033[32m[Installing base software...]\033[0m"
-	apt-get update
-	apt-get install git samba ssh vim-common vim-gtk  exuberant-ctags cscope
+    skip_this_step $FUNCNAME
+    if [ $? == 1 ] ; then
+       return 
+    fi
+
+    is_user_root;
+    echo -e "\033[32m[Installing base software...]\033[0m"
+    apt-get update
+    apt-get install git samba ssh vim-common vim-gtk  exuberant-ctags cscope;
+    print_result $FUNCNAME "ok"
 }
 
 check_tools_version()
 {
 	DOXYGEN_MIN_VERSION="1.8.0"
 	# Check the version of Doxygen
-	python $curdir/build/check_doxygen_version.py $(DOXYGEN_MIN_VERSION)
+	python $curdir/envtools/check_doxygen_version.py $(DOXYGEN_MIN_VERSION)
 }
 
 setup_post_tools()
 {
 	is_user_root;
+    skip_this_step $FUNCNAME
+    if [ $? == 1 ] ; then
+        return 
+    fi
 
 	echo -e "\033[32m[Installing base build dependencies...]\033[0m"
 	apt-get install python gawk git-core diffstat unzip zip texinfo gcc-multilib \
@@ -243,12 +403,21 @@ setup_post_tools()
 	echo -e "\033[32m[Installing protobuf compiler dependencies...]\033[0m"
 	apt-get install protobuf-compiler python-protobuf
 	echo -e "\033[32m[Installing qemu emulator dependencies...]\033[0m"
-	if [ `grep -c "Ubuntu 12.04" /etc/issue` -eq 1 ];then apt-get build-dep qemu-kvm;else apt-get build-dep qemu;fi
+	if [ `grep -c "Ubuntu 12.04" /etc/issue` -eq 1 ]; then apt-get build-dep qemu-kvm; else apt-get build-dep qemu; fi
 	apt-get install libexpat1-dev libcairo-dev
 	apt-get install libsdl-image1.2-dev
 
 	#check_tools_version;
-	echo -e "\033[32m[$FUNCNAME have been configured]\033[0m"
+    print_result $FUNCNAME "ok"
+
+}
+
+create_backdir()
+{
+    backup_dir="$curdir/backdir/$user_name"
+    echo -e "\033[32m[Create the backup dir $backup_dir]\033[0m"
+    mkdir -p $backup_dir
+    print_result $FUNCNAME "ok"
 }
 
 is_user_valid()
@@ -261,13 +430,15 @@ is_user_valid()
 		read user_name
 	done
 	user_home="/home/$user_name"
-	backup_dir="/home/$user_name/backup_dir"
-	echo -e "\033[32m[Create the backup dir $backup_dir]\033[0m"
-	mkdir -p $backup_dir
 }
 
 config_terminal_tab_color()
 {
+    skip_this_step $FUNCNAME  $gtkcss_file $user_home/.config/gtk-3.0/gtk.css
+    if [ $? == 1 ] ; then
+        return
+    fi
+
 	ret=`cat /etc/issue|awk '{print substr($2,0,5)}'`
 	if [ `echo "$ret > 12.04"|bc` -eq 0 ]
 	then
@@ -284,14 +455,15 @@ TerminalWindow .notebook tab:active {
 }
 EOF
 	fi
-	echo -e "\033[32m[$FUNCNAME have been configured]\033[0m"
+    print_result $FUNCNAME "ok"
 }
 
 main()
 {
 	is_user_root
 	is_user_valid	$1
-	setup_base_tools
+    create_backdir
+    setup_base_tools
 	config_vim;
 	config_ssh;
 	config_git;

@@ -1,4 +1,7 @@
 author:M.hui
+./config.sh to config system
+./update.sh to check the system files and git files
+
 Auto config ubuntu:
 	bashrc
 	vim
