@@ -10,6 +10,8 @@ bashrc_diff=$curdir/base_files/bashrc.diff
 vimrc_file=$curdir/base_files/vimrc
 vim_dir=$curdir/base_files/vim
 gitconfig_file=$curdir/base_files/gitconfig
+repogitdir=$curdir/base_files/git-repo.git
+
 bin_dir=$curdir/base_files/bin
 ssh_dir=$curdir/base_files/ssh
 gtkcss_file=$curdir/base_files/gtk.css
@@ -43,7 +45,7 @@ skip_this_step()
 {
     if [ $first_flag == 2 ]; then
         echo -e "[$color_light_red Auto setting all envs$color_white? yes/no [$color_red no $color_white]]\c"
-        read confirm 
+        read confirm
         if [ "$confirm" = 'y'  ] || [ "$confirm" == 'Y'  ]; then
             first_flag=1
         else
@@ -64,7 +66,7 @@ skip_this_step()
 
         while [ 1 ]; do
             echo -e "[Execute $color_green$1$color_white? yes/no/check [$color_red no $color_white]]\c"
-            read confirm 
+            read confirm
             if [ "$confirm" = 'y'  ] || [ "$confirm" == 'Y'  ]; then
                 return 0;
             elif [ "$confirm" = 'c'  ] || [ "$confirm" == 'C'  ]; then
@@ -83,76 +85,102 @@ skip_this_step()
     fi
 }
 
-config_vim()
+config_vimdir()
 {
-    skip_this_step $FUNCNAME $vimrc_file $user_home/.vimrc 
+    skip_this_step $FUNCNAME
     if [ $? == 1 ] ; then
-       return  
+       return
+    fi
+	vim_home="$user_home/.vim"
+    if [ -d $vim_home ]; then
+		echo -e "\033[32m[vim dir is exist,skip!!!\033[0m"
+        print_result $FUNCNAME "failed"
+    fi
+	mkdir -p  $vim_home
+    cp $vimr_dir/* $vim_home/ -rf
+	chown -R $user_name: $vim_home
+    print_result $FUNCNAME "ok"
+}
+
+config_vimrc()
+{
+    skip_this_step $FUNCNAME $vimrc_file $user_home/.vimrc
+    if [ $? == 1 ] ; then
+       return
     fi
     if [ -f $user_home/.vimrc ]; then
 		echo -e "\033[32m[vimrc is exist,we back up it to $backup_dir/vimrc_bak]\033[0m"
 		cp $user_home/.vimrc $backup_dir/vimrc_bak
 	fi
-	install $vimrc_file $user_home/.vimrc
-	vim_home="$user_home/.vim"
-	mkdir -p  $vim_home
-	cp $vimr_dir/* $vim_home/ -rf
+	#install $vimrc_file $user_home/.vimrc
+    ln -sf $vimrc_file $user_home/.vimrc
 	#Setup the Vundle
 	#git clone https://github.com/gmarik/Vundle.vim.git ~/.vim/bundle/Vundle.vim
 	chown -R $user_name: $user_home/.vimrc
-	chown -R $user_name: $vim_home
     print_result $FUNCNAME "ok"
 }
+
 config_ssh()
 {
-    skip_this_step $FUNCNAME 
+	ssh_home="$user_home/.ssh"
+    skip_this_step $FUNCNAME $ssh_dir $ssh_home
     if [ $? == 1 ] ; then
-       return  
+       return
     fi
 
 	if [ -d $user_home/.ssh ]; then
 		echo -e "\033[32m	[ssh is exist,we back up it to $backup_dir/ssh_bak"
 		cp $user_home/.ssh $backup_dir/ssh_bak -rf
 	fi
-	ssh_home="$user_home/.ssh"
-	mkdir -p $ssh_home
-	cp $ssh_dir/* $ssh_home/ -rf
-	echo -e "\033[32m	You should enable ssh by\033[0m \033[31mssh-add\033[0m"
+	#mkdir -p $ssh_home
+	#cp $ssh_dir/* $ssh_home/ -rf
+	ln -sf $ssh_dir $ssh_home
 	chown -R $user_name: $ssh_home
+	echo -e "$color_brown You should enable ssh by $color_red ssh-add $color_white"
     print_result $FUNCNAME "ok"
 
 }
+
+config_repo-git()
+{
+    repogitdir=$curdir/base_files/git-repo.git
+    skip_this_step $FUNCNAME $repogitdir $user_home/git-repo.git
+    if [ $? == 1 ] ; then
+       return
+    fi
+	ln -sf $repogitdir $user_home/git-repo.git
+	chown -R $user_name:  $user_home/git-repo.git
+    print_result $FUNCNAME "ok"
+}
+
+
 config_git()
 {
     skip_this_step $FUNCNAME $gitconfig_file $user_home/.gitconfig
     if [ $? == 1 ] ; then
-       return  
+       return
     fi
 
 	if [ -f $user_home/.gitconfig ]; then
 		echo -e "\033[32m[gitconfig is exist,we back up it to $backup_dir/gitconfig_bak]\033[0m"
 		cp $user_home/.gitconfig $backup_dir/gitconfig_bak
 	fi
-	cp $gitconfig_file $user_home/.gitconfig
-	cp $curdir/git-repo.git $user_home/		-rf
+	ln -sf $gitconfig_file $user_home/.gitconfig
 	chown -R $user_name:  $user_home/.gitconfig
     print_result $FUNCNAME "ok"
+    config_repo-git
 }
 
 config_bin()
 {
-    skip_this_step $FUNCNAME $bin_dir/*  $bin_home/
+	bin_home="$user_home/bin"
+    skip_this_step $FUNCNAME $bin_dir  $bin_home
     if [ $? == 1 ] ; then
-       return  
+       return
     fi
 
-	bin_home="$user_home/bin"
-	if [ ! -d $bin_home ]
-	then
-		mkdir -p $bin_home
-	fi
-	cp $bin_dir/*  $bin_home/ -rf
-	chown -R $user_name:  $bin_home
+    ln -sf $bin_dir $bin_home
+    chown -R $user_name:  $bin_home
     print_result $FUNCNAME "ok"
 }
 
@@ -160,7 +188,7 @@ create_samba_share_dir()
 {
 	is_user_root;
     if [ $? == 1 ] ; then
-       return  
+       return
     fi
 
 	echo -e "\033[32m[Create the samba share dir /home/share]\033[0m"
@@ -201,7 +229,7 @@ config_samba()
 {
     skip_this_step $FUNCNAME
     if [ $? == 1 ] ; then
-       return  
+       return
     fi
 
 	if [ -f /etc/samba/smb.conf ]; then
@@ -217,7 +245,7 @@ config_bashrc()
 {
    skip_this_step $FUNCNAME $user_home/.bashrc $bashrc_file
     if [ $? == 1 ] ; then
-        return 
+        return
     fi
     if [ -f $user_home/.bashrc ]; then
         echo -e "$color_red[$user_home/bashrc is exist,back up it to $backup_dir/bashrc]$color_white"
@@ -234,6 +262,7 @@ config_bashrc()
             read confirm
             if [ "$confirm" == 'y'  ] || [ "$confirm" == 'Y'  ]; then
                 install $bashrc_file $user_home/.bashrc
+                #ln -sf $bashrc_file $user_home/.bashrc
                 chown -R $user_name: $user_home/.bashrc
                 print_result $FUNCNAME "ok"
             elif [ "$confirm" = 'c'  ] || [ "$confirm" == 'C'  ]; then
@@ -252,7 +281,7 @@ config_bashrc2()
 {
     skip_this_step $FUNCNAME
     if [ $? == 1 ] ; then
-        return 
+        return
     fi
 
 	ret=`grep -rn "Beginning of sherlock" $user_home/.bashrc|wc -l`
@@ -368,7 +397,7 @@ setup_base_tools()
 {
     skip_this_step $FUNCNAME
     if [ $? == 1 ] ; then
-       return 
+       return
     fi
 
     is_user_root;
@@ -390,7 +419,7 @@ setup_post_tools()
 	is_user_root;
     skip_this_step $FUNCNAME
     if [ $? == 1 ] ; then
-        return 
+        return
     fi
 
 	echo -e "\033[32m[Installing base build dependencies...]\033[0m"
@@ -464,7 +493,8 @@ main()
 	is_user_valid	$1
     create_backdir
     setup_base_tools
-	config_vim;
+	config_vimrc;
+	config_vimdir;
 	config_ssh;
 	config_git;
 	config_bin;

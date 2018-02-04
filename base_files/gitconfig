@@ -48,10 +48,13 @@
 
 #Whaley config:
 [user]
-	email = fang.hui@whaley.com
-	name =fang.hui
+	email = fh150658@alibaba-inc.com
+	name = fh150658
+
 [color]
 	ui = auto
 [core]
 	editor = vim
 
+[push]
+	default = matching

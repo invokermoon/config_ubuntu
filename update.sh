@@ -45,7 +45,7 @@ pre_checking()
             echo ""${GITHUB_FILES[$i]}" not exist"
             exit
         fi
-        git diff ${GITHUB_FILES[$i]} ${SYSTEM_FILES[$i]} >/dev/null 2>&1
+        diff ${GITHUB_FILES[$i]} ${SYSTEM_FILES[$i]} >/dev/null 2>&1
         if [ $? == 0 ]; then
             diff_status="SAME"
             echo -e "           $color_red[$diff_status]$color_green ${GITHUB_FILES[$i]} $color_white VS $color_green ${SYSTEM_FILES[$i]} $color_white"
@@ -70,13 +70,13 @@ pre_checking()
             echo "${GITHUB_DIRS[$i]} not exist"
             exit
         fi
-        git diff ${GITHUB_DIRS[$i]} ${SYSTEM_DIRS[$i]} >/dev/null 2>&1
+        diff ${GITHUB_DIRS[$i]} ${SYSTEM_DIRS[$i]} >/dev/null 2>&1
         if [ $? == 0 ]; then
             diff_status="SAME"
-            echo -e "           $color_red[$diff_status]$color_green ${GITHUB_FILES[$i]} $color_white VS $color_green ${SYSTEM_FILES[$i]} $color_white"
+            echo -e "           $color_red[$diff_status]$color_green ${GITHUB_DIRS[$i]} $color_white VS $color_green ${SYSTEM_DIRS[$i]} $color_white"
         else
             diff_status="DIFF"
-            echo -e "           $color_light_red[$diff_status]$color_green ${GITHUB_FILES[$i]} $color_white VS $color_green ${SYSTEM_FILES[$i]} $color_white"
+            echo -e "           $color_light_red[$diff_status]$color_green ${GITHUB_DIRS[$i]} $color_white VS $color_green ${SYSTEM_DIRS[$i]} $color_white"
         fi
 
         diff=`git diff ${GITHUB_DIRS[$i]}`
@@ -121,18 +121,23 @@ diff_dirs()
                             rsync -avzp $rfile  ${GITHUB_DIRS[$i]}/ >/dev/null
                             md5sum $file >> $md5path
                             #echo -e "Update $color_brown $file to ${GITHUB_DIRS[$i]}/$file_basename "$color_white"done"
-                            printf "[$DATE][$color_green%-40.40s -----> %70.70s $color_white]===========>[$color_green ok $color_white]\n\n" $file ${GITHUB_DIRS[$i]}/$file_basename 
+                            printf "[$DATE][$color_green%-40.40s -----> %70.70s $color_white]===========>[$color_green ok $color_white]\n\n" $file ${GITHUB_DIRS[$i]}/$file_basename
+                            install $file ${GITHUB_DIRS[$i]}/$file_basename
                         elif [ "$confirm" = 'c'  ] || [ "$confirm" == 'C'  ]; then
                             git diff $file ${GITHUB_DIRS[$i]}/$file_basename
                             continue;
                         elif [ "$confirm" = 'i'  ] || [ "$confirm" == 'I'  ]; then
                             echo "$file" >>$ignore_checkfiles
+                            printf "[$DATE][$color_green%-40.40s -----> %70.70s $color_white]============>[$color_yellow ignore $color_white]\n\n" $file ${GITHUB_DIRS[$i]}/$file_basename
                         else
-                            printf "[$DATE][$color_green%-40.40s -----> %70.70s $color_white]============>[$color_yellow ignore $color_white]\n\n" $file ${GITHUB_DIRS[$i]}/$file_basename 
+                            printf "[$DATE][$color_green%-40.40s -----> %70.70s $color_white]============>[$color_yellow ignore $color_white]\n\n" $file ${GITHUB_DIRS[$i]}/$file_basename
                         fi
                         break
                     done
                 fi
+            elif [ -f $file ] && [ -n "$ignore_ret" ]; then
+                file_basename=`basename $file`
+                printf "[$DATE][$color_green%-40.40s -----> %70.70s $color_white]============>[$color_yellow ignore $color_white]\n\n" $file ${GITHUB_DIRS[$i]}/$file_basename
             fi
         done
     done
@@ -141,7 +146,7 @@ diff_dirs()
 diff_files()
 {
     for ((i=0;i<$github_files_num;i++)) do
-        DIFF=`git diff ${GITHUB_FILES[$i]} ${SYSTEM_FILES[$i]}`
+        DIFF=`diff ${GITHUB_FILES[$i]} ${SYSTEM_FILES[$i]}`
         if [ ! -z "$DIFF" ]; then
             #echo "${GITHUB_FILES[$i]} VS ${SYSTEM_FILES[$i]}" >>$GITHUB_LOG
             #git diff ${GITHUB_FILES[$i]} ${SYSTEM_FILES[$i]} >>$GITHUB_LOG
@@ -151,7 +156,7 @@ diff_files()
                 if [ "$confirm" = 'y'  ] || [ "$confirm" == 'Y'  ]; then
                     echo -e $color_blue"Copy: ${SYSTEM_FILES[$i]}  to ${GITHUB_FILES[$i]} "$color_white
                     printf "[$DATE][$color_green%-40.40s -----> %70.70s $color_white]============>[$color_green ok $color_white]\n\n" ${SYSTEM_FILES[$i]} ${GITHUB_FILES[$i]}
-                    echo "TODO"
+                    install ${SYSTEM_FILES[$i]} ${GITHUB_FILES[$i]}
                 elif [ "$confirm" = 'c'  ] || [ "$confirm" == 'C'  ]; then
                     git diff ${GITHUB_FILES[$i]} ${SYSTEM_FILES[$i]}
                     continue;

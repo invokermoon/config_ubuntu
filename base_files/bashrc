@@ -182,7 +182,7 @@ trash()
 {
     echo $@
     local del_files=$(echo $@ | sed -n 's/-rf//g;p')
-    echo -e $color_GREEN"remove the dir:"
+    echo -e $color_GREEN"remove the files/dirs:"
     readlink -f $del_files
     echo -e $color_RED
 	read -p "clear sure?[y/n/trash]" confirm
