@@ -16,6 +16,11 @@ bin_dir=$curdir/base_files/bin
 ssh_dir=$curdir/base_files/ssh
 gtkcss_file=$curdir/base_files/gtk.css
 
+gnu_tgz="$curdir/envtools/global-6.6.1.tar.gz"
+gnu_base="$curdir/envtools/global-6.6.1"
+uctags_base="$curdir/envtools/ctags"
+
+
 color_none="\033[m"
 color_red="\033[0;32;31m"
 color_light_red="\033[1;31m"
@@ -403,7 +408,7 @@ setup_base_tools()
     is_user_root;
     echo -e "\033[32m[Installing base software...]\033[0m"
     apt-get update
-    apt-get install git samba ssh vim-common vim-gtk  exuberant-ctags cscope;
+    apt-get install git samba ssh vim-common vim-gtk cscope;
     print_result $FUNCNAME "ok"
 }
 
@@ -487,6 +492,82 @@ EOF
     print_result $FUNCNAME "ok"
 }
 
+config_uctags()
+{
+    #we need to know there are 2 tags:
+    #1.Exuberant Ctags: this is stoping  to maintain. we discard it.[install :sudo apt-get install exuberant-ctags)
+    #2.Universal ctags: this is more powerful and updating.[install:  by us]
+    skip_this_step $FUNCNAME
+    if [ $? == 1 ] ; then
+        return
+    fi
+
+    type ctags
+    if [ $? == 0 ]; then
+        echo -e "$color_red[ Tool ctags is exsist!!!]"
+    else
+
+        if [ ! -d $uctags_base ]; then
+            cd $curdir/envtools && git clone https://github.com/universal-ctags/ctags
+        fi
+
+        cd $uctags_base;
+        ./autogen.sh && ./configure && make && make install;  # defaults to /usr/local, you can --prefix=/where/you/want
+    fi
+    type ctags
+
+    #./autogen.sh && ./configure --program-prefix=u- && make && sudo make install;  # defaults to /usr/local, you can --prefix=/where/you/want
+    #type u-ctags
+    if [ $? == 0 ]; then
+        print_result $FUNCNAME "ok"
+    else
+        print_result $FUNCNAME "failed"
+    fi
+    cd $curdir;
+}
+
+config_global()
+{
+    config_uctags;
+    skip_this_step $FUNCNAME
+    if [ $? == 1 ] ; then
+        return
+    fi
+
+    type gtags
+    if [ $? == 0 ]; then
+        echo -e "$color_red[ Tool gtags is exsist!!!]"
+    else
+        cd  $curdir/envtools
+        if [ ! -f $gnu_tgz ]; then
+            echo -e "$color_red[Error:No $gnu_tgz ]"
+            return;
+        fi
+        tar xvf $gnu_tgz
+        cd $gnu_base;
+        if [ -f "/usr/local/bin/ctags" ]; then
+            ./configure --with-universal-ctags=/usr/local/bin/ctags && make && make install;
+        elif [ -f "/usr/bin/ctags" ]; then
+            ./configure --with-universal-ctags=/usr/bin/ctags && make && make install;
+        else
+            echo -e "$color_red[Err: can't find the ctags]"
+            print_result $FUNCNAME "failed"
+        fi
+    fi
+    type gtags
+    if [ $? == 0 ]; then
+        ln -sf $curdir/base_files/globalrc   ~/.globalrc
+        chown -R $user_name: ~/.globalrc
+        print_result $FUNCNAME "ok"
+    else
+        print_result $FUNCNAME "failed"
+    fi
+    cd $curdir;
+    #echo -e "$color_light_red[Notice: if we use other name(eg:u-ctags) to instead the ctags, we should cpy $base_files/globalrc to ~/.globalrc]"
+    echo -e "$color_light_red Any Q/Other ways, refer to the file global-6.6.1/plugin-factory/PLUGIN_HOWTO"
+    echo -e "Or refer to: http://www.gnu.org/software/global/manual/global.html#gtags_002econf (search:export GTAGSLABEL=new-ctags)"
+}
+
 main()
 {
 	is_user_root
@@ -500,7 +581,8 @@ main()
 	config_bin;
 	config_samba;
 	config_bashrc;
-	#setup_post_tools;
+    config_global;
+    #setup_post_tools;
 	config_terminal_tab_color;
 }
 main $@;

@@ -302,8 +302,19 @@ function FindingTagsDir()"{{{
     while i < maxdepth
         let dir=simplify(dir)
         let tags_dir_path=dir . '/.tags_dir/'
-        "call Echo("Finding:". tags_dir_path)
-        if isdirectory(tags_dir_path) 
+        if filereadable(dir . '/GTAGS')
+            call Echo("Finding GTAGS: ".dir)
+            if executable('gtags-cscope')
+                call LoadingGtags(dir . '/')
+                break
+            elseif executable('cscope')
+                call LoadingCscopeTags(dir)
+                break
+            endif
+        endif
+
+        if isdirectory(tags_dir_path)
+            call Echo("Finding .tags_dir:". tags_dir_path)
             if executable('gtags-cscope')
                 call LoadingGtags(tags_dir_path)
                 break
