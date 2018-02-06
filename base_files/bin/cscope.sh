@@ -179,8 +179,8 @@ populate_file_list()
 
 build_global()
 {
-    printf "[+]$color_yellow Show the Gnu-global env:$color_LIGHT_RED\n"
-    gtags --config
+    #printf "[+]$color_yellow Show the Gnu-global env:$color_LIGHT_RED\n"
+    #gtags --config
     printf "$color_white[+] Building GNU Global database...\n"
     #gtags -f $reference_tagsfile $tags_dir --accept-dotfiles
     gtags -f $reference_tagsfile $tags_dir --accept-dotfiles

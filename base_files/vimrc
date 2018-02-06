@@ -1,10 +1,12 @@
 "语法Notes:
-"1.leader is \ default,you can rewrite by: let mapleader=";"
+"1.shortcuts/maps:
+"   >leader is \ default,you can rewrite by: let mapleader=";"
+"   >:map to see all the maps
 "2.https://exvim.github.io/docs-zh/plugins/    this website contains all the vim-script
 "3,if you want surfing with C++:https://github.com/Rip-Rip/clang_complete/wiki
 "4.How to setting shell env/bash环境变量: let AAAA=bbbb
 "5.a:表示当前函数内部的变量 g:表示全局变量
-"6.sfile :fucntion stack  
+"6.sfile :fucntion stack
 "  %:p:h":dir path that opened by VIM eg:vim ./
 "  afile :file that opened by vim,eg:vim a.c
 "  getcwd(): get the current pwd, not the opened path
@@ -15,12 +17,9 @@
 "substitute:
 "   echon " ["substitute(expand('<sfile>'), '\function \|\(\.\.\Echo\)', '', '')"]"
 "   |: more cmds. eg:cmd1 | cmd
-"
-"
 
 
-"Common head setting
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"Common head setting >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 set nocompatible               " be iMproved
 filetype off                   " required!
 "let mapleader=";" //just a example
@@ -28,15 +27,9 @@ filetype off                   " required!
 filetype on
 filetype plugin on
 filetype indent on
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
-"Plugins Manage:vim-plugin 最好　其他什么vundle 就是一坨屎
-"How to use vim-plug
-"curl -fLo ~/.local/share/nvim/site/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-"
-call plug#begin('~/.vim/plugged')
-"Plugin functions<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 function PluginAirlineConfig()"{{{
     set t_Co=256
     set laststatus=2
@@ -89,7 +82,6 @@ function PluginAirlineConfig()"{{{
     let g:airline_detect_paste=1
 
 endfunction"}}}
-
 function PluginTgasListConfig()"{{{
     ":nmap <silent> <F9> <ESC>:Tlist<RETURN>
     "tagbar setting
@@ -104,7 +96,6 @@ function PluginTgasListConfig()"{{{
     let Tlist_Process_File_Always=1         "是否一直处理tags.1:处理;0:不处理
     "let Tlist_Inc_Winwidth=0                "不是一直实时更新tags，因为没有必要"
 endfunction"}}}
-
 function PluginleaderfConfig()"{{{
     let g:Lf_ShortcutF = '<leader>lff'
     let g:Lf_ShortcutB = '<leader>lfb'
@@ -112,230 +103,6 @@ function PluginleaderfConfig()"{{{
     let g:Lf_Ctags = "/usr/local/bin/gtags"
     "let g:Lf_Ctags = "/usr/bin/ctags"
 endfunction"}}}
-
-function LoadingCscopeTags(tagsdir)"{{{
-"if has('cscope')
-    call SetupCscopeEnv()
-    if filereadable(a:tagsdir . 'cscope.out')
-        let cscope_file=findfile('cscope.out', '.;')
-        let cscope_path=matchstr('cscope.out', a:tagsdir)
-        if  !filereadable(cscope_file)
-            call Echo("NO cscope to be found")
-            return 0
-        endif
-
-        if executable('cscope')
-            call Echo("cscope is available")
-            call Echo("Add cscope:" . cscope_path . cscope_file)
-            exe "cs add" cscope_file cscope_path
-        elseif
-            call Echo("cscope is disable")
-            return 0
-        endif
-
-    endif
-    if filereadable(a:tagsdir . 'tags')
-        if executable('ctags')
-            call Echo("ctags is available")
-            execute 'set tags =' . a:tagsdir . 'tags'
-            call Echo("Add ctags:" . a:tagsdir . 'tags')
-        elseif
-            call Echo("ctags is disable")
-            return 0
-        endif
-    endif
-    return 1
-endfunction"}}}
-
-function! SetupCscopeEnv() "{{{
-    " Disable gtags temporary
-    "csto：命令的查找次序，默认为0，0为从cscope开始，1为从ctags开始,cscopetagorder==csto
-    set csto=0
-    "是否用cscope代替ctags，在需要使用tag文件的时候，比如:tag命令和<C-]>命令 , cscopetag == cst
-    set cst
-    "是否告之数据库加载结果
-    set nocsverb
-    ""cspc decide the length of path,cscopepathcomp==cspc
-    set cspc=0
-    "cscopequickfix：设置quickfix窗口里显示的选项，+代表添加到quickfix窗口，-代表清楚上次选项，0代表不添加
-    set cscopequickfix=s0,c0,d0,i0,t0,e0
-    "cscopeprg==csprg
-    set csprg=/usr/bin/cscope
-endfunction "}}}
-
-function! CleanupCscopeEnv() "{{{
-endfunction "}}}
-
-function! FindFiles(pat, ...)"{{{
-     let path = ''
-     for str in a:000
-         let path .= str . ','
-     endfor
-
-     if path == ''
-         let path = &path
-     endif
-
-     call Echo('finding...')
-     redraw
-     call append(line('$'), split(globpath(path, a:pat), '\n'))
-     call Echo('finding...done!')
-     redraw
-endfunc"}}}
-
-function! UpdatingGtags(f)"{{{
-     let dir = fnamemodify(a:f, ':p:h')
-     "坚决不用gtags -u这个命令有很大的弊端　　会产生很多小的进程在后台　所以基本上这个命令也被gtags官方都否认了
-     "exe 'silent !cd ' . dir . ' && gtags -i '
-     "exe 'silent !cd ' . dir . ' && gtags -i &> /dev/null &'
-     exe 'silent !cd ' . dir . ' && gtags --single-update 'a:f' &> /dev/null &'
-     call Echo("GTAGS Updateing:"a:f)
- endfunction"}}}
-
-function SetupGtagsMappings()"{{{
-    nmap <silent> <leader>j <ESC>:cstag <c-r><c-w><CR>
-    nmap <silent> <leader>g <ESC>:lcs f c <c-r><c-w><cr>:lw<cr>
-    nmap <silent> <leader>s <ESC>:lcs f s <c-r><c-w><cr>:lw<cr>
-    "command! -nargs=+ -complete=dir FindFiles :call FindFiles(<f-args>)
-    au BufWritePost *.[ch] call UpdatingGtags(expand('<afile>'))
-endfunc"}}}
-
-function SetupUpdatingGtags()"{{{
-    "command! -nargs=+ -complete=dir FindFiles :call FindFiles(<f-args>)
-    au BufWritePost *.[ch] call UpdatingGtags(expand('<afile>'))
-endfunc"}}}
-
-function LoadingGtags(tagsdir)"{{{
-    if filereadable(a:tagsdir . 'GTAGS')
-        let tags_file="GTAGS"
-        let tags_path=a:tagsdir
-        if executable('gtags-cscope')
-            call SetupGtagsEnv(a:tagsdir)
-            call SetupGtagsMappings()
-            call SetupUpdatingGtags()
-            call Echo("Loading GTAGS:". a:tagsdir . 'GTAGS')
-            exe "cs add " . a:tagsdir . 'GTAGS'
-        elseif
-            call Echo("Please Install gtags-cscope")
-            return 0
-        endif
-        return 1
-    endif
-    call Echo("Not found GTAGS in ",a:tagsdir)
-endfunction"}}}
-
-function! SetupGtagsEnv(tagsdir) "{{{
-    "" Treat 'h' file as c++ type for gtags
-    "let $GTAGSFORCECPP = 1 
-    "let project_path=getcwd()
-    "get the father dir,remove the .tags_dir
-    let project_path=substitute(expand(a:tagsdir), '\(\.tags_dir\/\)', '', '')
-    " Set the root of source tree for gtags, this config can locate your file path
-    let $GTAGSROOT = project_path
-    " Set the directory on which tag files exists,this config will help you to add the tags
-    "let $GTAGSDBPATH = expand("%:p:h") . '/.tags_dir'
-    let $GTAGSDBPATH = a:tagsdir
-    call Echo("GTAGSROOT=",$GTAGSROOT)
-    call Echo("GTAGSDBPATH=",$GTAGSDBPATH)
-
-    set csto=0
-    set cst
-    set cspc=0
-    "set cscopequickfix=c-,d-,e-,f-,g0,i-,s-,t-
-    set cscopequickfix=s0,c0,d0,i0,t0,e0
-    set csprg=gtags-cscope "csprg==cscopeprg
-
-    " To use the default key/mouse mapping:
-    "	let g:GtagsCscope_Auto_Map = 1
-    " To ignore letter case when searching:
-    "	let g:GtagsCscope_Ignore_Case = 1
-    " To use absolute path name:
-    "       let g:GtagsCscope_Absolute_Path = 1
-    " To deterring interruption:
-    "	let g:GtagsCscope_Keep_Alive = 1
-    " If you hope auto loading:
-    "	let GtagsCscope_Auto_Load = 1
-    " To use 'vim -t ', ':tag' and '<C-]>'
-    "	set cscopetag
-    let g:GtagsCscope_Auto_Load = 1
-    let g:GtagsCscope_Auto_Map = 1
-    let g:GtagsCscope_Absolute_Path = 1
-endfunction "}}}
-
-function! CleanupGtagsEnv() "{{{
-    " Treat 'h' file as c++ type for gtags
-    set cscopeprg&
-    let $GTAGSFORCECPP=""
-    let $GTAGSROOT=""
-    let $GTAGSDBPATH=""
-endfunction "}}}
-
-function! Echo(msg,...)"{{{
-    "Title ErrorMsg WarningMsg
-    echohl Title 
-    ""ErrorMsg represent the red color
-    ""if the funciton name is s:echo,this is the droid you're looking for
-    ""echo substitute(expand('<sfile>'), '.*\(\.\.\|\s\)', '', '')
-    "" compare with this (not what you want, just for reference)
-    "echo expand('<sfile>')
-    let index = 1
-    let msg_all="[-vimrc-]".a:msg
-    while index <= a:0
-        let msg_all=msg_all . a:{index} 
-        let index = index + 1
-    endwhile
-    "echo printf("%s",msg_all)
-    echo printf("%-100.100s",msg_all)
-    let stack_msg=substitute(expand('<sfile>'), '\(\.\.\Echo\)', '', '')
-    echon "["substitute(expand(stack_msg), '\(\function \)', '', '')"]"
-    echo ""
-    echohl None
-endfunction"}}}
-
-function FindingTagsDir()"{{{
-    let maxdepth = 4
-    "call Echo("VimOPenFile",expand('<afile>'))
-    let VimOpenPath=expand("%:p:h")
-    call Echo("OpenPath=" . VimOpenPath)
-    let dir =getcwd()
-    let i = 0
-    while i < maxdepth
-        let dir=simplify(dir)
-        let tags_dir_path=dir . '/.tags_dir/'
-        if filereadable(dir . '/GTAGS')
-            call Echo("Finding GTAGS: ".dir)
-            if executable('gtags-cscope')
-                call LoadingGtags(dir . '/')
-                break
-            elseif executable('cscope')
-                call LoadingCscopeTags(dir)
-                break
-            endif
-        endif
-
-        if isdirectory(tags_dir_path)
-            call Echo("Finding .tags_dir:". tags_dir_path)
-            if executable('gtags-cscope')
-                call LoadingGtags(tags_dir_path)
-                break
-            elseif executable('cscope')
-                call LoadingCscopeTags(tags_dir_path)
-                break
-            endif
-        endif
-
-        let dir = dir . '/..'
-        let i = i + 1
-        if i == maxdepth
-            call Echo("Not found .tags_dir")
-        endif
-    endwhile
-endfunction"}}}
-
-function PluginGtagsConfig()"{{{
-    call FindingTagsDir()
-endfunction"}}}
-
 function PluginNerdtreeConfig()"{{{
     map <F3> :NERDTreeToggle<CR>
     imap <F3> <ESC> :NERDTreeToggle<CR>
@@ -367,13 +134,9 @@ function PluginNerdtreeConfig()"{{{
     :autocmd BufRead,BufNewFile *.dot map <F5> :w<CR>:!dot -Tjpg -o %<.jpg % && eog %<.jpg <CR><CR> && exec "redr!"
     "当打开vim且没有文件时自动打开NERDTree
     autocmd vimenter * if !argc() | NERDTree | endif
-    " 只剩 NERDTree时自动关闭
-    autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTreeType") && b:NERDTreeType == "primary") | q | endif
-
-    "let g:winManagerWindowLayout='FileExplorer'
-    "nmap wm :WMToggle<cr>"
+    "只剩 NERDTree时自动关闭
+    autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
 endfunction"}}}
-
 function PluginNerdcommenterConfig()"{{{
     let g:NERDSpaceDelims=1
     "Help:
@@ -383,150 +146,147 @@ function PluginNerdcommenterConfig()"{{{
     "<leader>cy   先复制, 再注解(p可以进行黏贴)
     "
 endfunction"}}}
-"Plugin Functions end>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-"eg:
-"Bundle 'tpope/vim-fugitive'
-"Bundle 'git://git.wincent.com/command-t.git'
-
-"不确定,not sure <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-"自动识别目前编码
-"Plug 's3rvac/AutoFenc'
-"记录你每天花了多久编程，分别使用那种语言编程，分别在哪写（git）project里编过程，会把数据同步到WakaTime 路 Quantify your coding，还会每天（或每周）给你发邮件，这个要收费，免费版只保留7天的数据。
-"Plug 'wakatime/vim-wakatime'
-">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-"common repos
-"Plugin 'vim-airline/vim-airline'
-"状态栏
-Plug 'bling/vim-airline'
-Plug 'vim-airline/vim-airline-themes'
-call PluginAirlineConfig()
-"能在窗口中展示vim撤销记录。
-Plug 'mbbill/undotree'
-Plug 'flazz/vim-colorschemes'
-">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-"Gtags,cscope,tags
-call PluginGtagsConfig()
-Plug 'vim-scripts/gtags.vim'
-"whatot/gtags-cscope.vim千万别打开，会导致问题的,比如和F3冲突
-"Plug 'whatot/gtags-cscope.vim'
-">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-"taglist tagbar
-">   tagbar: need ctags,就是显示一些符号变量的
-Plug 'majutsushi/tagbar'
-Plug 'vim-scripts/taglist.vim'
-call PluginTgasListConfig()
-">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-"查找.search :
-">fzf(option1) using git
-"   Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
-">fzf(option2) not using git (recommand)
-"   Plug 'junegunn/fzf'
-
-">leaderf(option3): <leader>f
-"   模糊查找文件，buffer，tags等，比ctrlp，unite，fzf等好用多了
-"   \lff: find file
-"   \lft: find tags
-Plug 'Yggdroot/LeaderF', { 'do': './install.sh' }
-call PluginleaderfConfig()
-">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-"窗口插件
-">qucikfix就是我们平常用cscope搜索的窗口　或者有时候编译提示信息的窗口
-">qucikfix是内置插件,当有错误的时候:cw才有用
-">winmanage就是nerdtree这样的文件浏览器,这个早已经被弃用了,没有任何意义
-">minibufexpl 就是我们打开多个文件那个小tab,不需要安装
-">jlanzarotta/bufexplorer 就是我们用的\be那些操作
-Plug 'jlanzarotta/bufexplorer'
-">NERDTREE:a very simple tree to manage the dir
-Plug 'scrooloose/nerdtree'
-"Plug 'Xuyuanp/nerdtree-git-plugin' //感觉有点卡
-call PluginNerdtreeConfig()
-">注释插件 注释的时候自动加个空格, 强迫症必配
-Plug 'scrooloose/nerdcommenter'
-call PluginNerdcommenterConfig()
-">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-"超级辅助插件
-">括号匹配高亮
-Plug 'luochen1990/rainbow'
-let g:rainbow_active=1"
-" Plug 'kien/rainbow_parentheses.vim' "this plugin is useless, it is worse than by rainbow
-">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-"智能补全　但是我们用C-p来操作的话　最好还是用内置自带的补全,也就是下面都不用打开
-"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-"YCM
-function! BuildYCM(info)"{{{
-  " info is a dictionary with 3 fields
-  " - name:   name of the plugin
-  " - status: 'installed', 'updated', or 'unchanged'
-  " - force:  set on PlugInstall! or PlugUpdate!
-  if a:info.status == 'installed' || a:info.force
-    !./install.py
-  endif
-endfunction"}}}
-
-"智能补全
-"Plug 'Valloric/YouCompleteMe', { 'do': function('BuildYCM') }
-"Plug 'Valloric/YouCompleteMe'
-"生成配置文件为YCM
-"Plug 'rdnetto/YCM-Generator', { 'branch': 'stable' }
-
-"SuperTab
-"SuperTab使Tab快捷键具有更快捷的上下文提示功能。也就是一种自动补全插件,有时候跟TAB冲突　尽量不用打开"{{{
-"Plug 'SuperTab'
-"let g:SuperTabRetainCompletionType=2
-" 0 - 不记录上次的补全方式
-" 1 - 记住上次的补全方式,直到用其他的补全命令改变它
-" 2 - 记住上次的补全方式,直到按ESC退出插入模式为止
-"虽然supertab自动补全很好用，但是在normal情况下，是不需要补全的，实现普通缩进的功能就可以了。
-"但是被supertab占用了，tab普通情况下也不能缩进。
-"解决方法很简单:
-":unmap <c-i>
-":nmap <c-i> a空格空格空格空格
-"c-i 在vim中等同于tab  ，相当于先解除普通情况下绑定，然后绑定到输入模式加4个空格
+function PluginSupertabConfig()"{{{
+    "SuperTab使Tab快捷键具有更快捷的上下文提示功能。也就是一种自动补全插件,有时候跟TAB冲突　尽量不用打开
+    let g:SuperTabRetainCompletionType=2
+    " 0 - 不记录上次的补全方式
+    " 1 - 记住上次的补全方式,直到用其他的补全命令改变它
+    " 2 - 记住上次的补全方式,直到按ESC退出插入模式为止
+    "虽然supertab自动补全很好用，但是在normal情况下，是不需要补全的，实现普通缩进的功能就可以了。
+    "但是被supertab占用了，tab普通情况下也不能缩进。
+    "解决方法很简单:
+    :unmap <c-i>
+    :nmap <c-i> a空格空格空格空格
+    "c-i 在vim中等同于tab  ，相当于先解除普通情况下绑定，然后绑定到输入模式加4个空格
+endfunction
 "}}}
-">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-"tabular是一个帮你用像=,,这种符号来对齐一些文本的插件。当你在编写json或者有许多变量的代码 时非常有用
-Plug 'godlygeek/tabular'
-"md文件语法高亮和文件类型检测
-Plug 'plasticboy/vim-markdown'
-"Plug 'suan/vim-instant-markdown'"
-"{{{
-"vim-instant-markdown这是一个实时预览的插件，当你用vim打开markdown文档的时候，会自动打开一个浏览器窗口，并且可以实时预览
-"但是必须先安装新版的node.js:
-"sudo add-apt-repository ppa:chris-lea/node.js
-"sudo apt-get update
-"sudo apt-get install nodejs
-"安装完node.js之后安装instant-markdown-d
-"sudo npm -g install instant-markdown-d
+"How to use vim-plug
+"curl -fLo ~/.local/share/nvim/site/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+function! Plug_manage()
+    "vim-plugin 最好　其他什么vundle 就是一坨屎
+    call plug#begin('~/.vim/plugged')
+
+"Discard plugin:
+    "智能补全　但是我们用C-p来操作的话　最好还是用内置自带的补全,也就是下面都不用打开
+    "YouCompleteMe:太大,没有意义,别用
+    "SuperTab:和TAB冲突 尽量别用
+    "Plug 'SuperTab'
+    "call PluginSupertabConfig();
+    "">自动识别目前编码
+    "Plug 's3rvac/AutoFenc'
+    ">记录你每天花了多久编程，分别使用那种语言编程，分别在哪写（git）project里编过程，会把数据同步到WakaTime 路 Quantify your coding，还会每天（或每周）给你发邮件，这个要收费，免费版只保留7天的数据。
+    "Plug 'wakatime/vim-wakatime'
+    "">Plug 'suan/vim-instant-markdown'""{{{
+    "vim-instant-markdown这是一个实时预览的插件，当你用vim打开markdown文档的时候，会自动打开一个浏览器窗口，并且可以实时预览
+    "但是必须先安装新版的node.js:
+    "sudo add-apt-repository ppa:chris-lea/node.js
+    "sudo apt-get update
+    "sudo apt-get install nodejs
+    "安装完node.js之后安装instant-markdown-d
+    "sudo npm -g install instant-markdown-d
 "}}}
-"
-let g:vim_markdown_folding_disabled=1
-let g:vim_markdown_toc_autofit=1
-">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-"其他语言扩展插件
-"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-"C函数的辅助插件
-Plug 'exvim/ex-cref'
-"vim-jsbeautify包括html,css,javascript缩进和语法高亮功能。我没用它所以没有建议
-"Plug 'maksimr/vim-jsbeautify'
-"
-Plug 'fatih/vim-go'
-"vim-autoformat，比如c++，会自动调用诸如astyle, clang-format来对代码进行美化
-Plug 'Chiel92/vim-autoformat'
+"Base Plugin:
+    ">状态栏,airline 完爆 powerline
+    "----------------------------------------------------------------------------------------------------------------------------------------
+    Plug 'vim-airline/vim-airline'
+    Plug 'vim-airline/vim-airline-themes'
+    call PluginAirlineConfig()
 
-call plug#end()
-">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    "----------------------------------------------------------------------------------------------------------------------------------------
+    ">能在窗口中展示vim撤销记录。
+    "----------------------------------------------------------------------------------------------------------------------------------------
+    Plug 'mbbill/undotree'
+    Plug 'flazz/vim-colorschemes'
 
+    "----------------------------------------------------------------------------------------------------------------------------------------
+    ">Gtags,cscope,tags
+    "----------------------------------------------------------------------------------------------------------------------------------------
+    Plug 'vim-scripts/gtags.vim'
+
+    "----------------------------------------------------------------------------------------------------------------------------------------
+    "Plug 'whatot/gtags-cscope.vim'     "whatot/gtags-cscope.vim千万别打开，会导致问题的,比如和F3冲突
+    ">taglist tagbar
+    ">>      tagbar: need ctags,就是显示一些符号变量的
+    ">>      taglist:跟tagbar差不多 都是看变量函数的
+    "----------------------------------------------------------------------------------------------------------------------------------------
+    Plug 'majutsushi/tagbar'
+    Plug 'vim-scripts/taglist.vim'
+    call PluginTgasListConfig()
+
+    "----------------------------------------------------------------------------------------------------------------------------------------
+    ">查找/search:
+    ">fzf(option1) using git
+    "   Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
+    ">fzf(option2) not using git (recommand)
+    "   Plug 'junegunn/fzf'
+    ">leaderf(option3): <leader>f
+    "   模糊查找文件，buffer，tags等，比ctrlp，unite，fzf等好用多了
+    "   \lff: find file
+    "   \lft: find tags
+    "----------------------------------------------------------------------------------------------------------------------------------------
+    Plug 'Yggdroot/LeaderF', { 'do': './install.sh' }
+    call PluginleaderfConfig()
+
+    "----------------------------------------------------------------------------------------------------------------------------------------
+    "窗口插件
+    ">qucikfix就是我们平常用cscope搜索的窗口　或者有时候编译提示信息的窗口
+    ">qucikfix是内置插件,当有错误的时候:cw才有用
+    ">winmanage就是nerdtree这样的文件浏览器,这个早已经被弃用了,没有任何意义
+    ">minibufexpl 就是我们打开多个文件那个小tab,不需要安装
+    ">jlanzarotta/bufexplorer 就是我们用的\be那些操作
+    ">NERDTREE:a very simple tree to manage the dir
+    "----------------------------------------------------------------------------------------------------------------------------------------
+    Plug 'jlanzarotta/bufexplorer'
+    Plug 'scrooloose/nerdtree'
+
+    "----------------------------------------------------------------------------------------------------------------------------------------
+    ">Plug 'Xuyuanp/nerdtree-git-plugin' "感觉有点卡
+    "----------------------------------------------------------------------------------------------------------------------------------------
+    call PluginNerdtreeConfig()
+
+    "----------------------------------------------------------------------------------------------------------------------------------------
+    ">注释插件 注释的时候自动加个空格, 强迫症必配
+    "----------------------------------------------------------------------------------------------------------------------------------------
+    Plug 'scrooloose/nerdcommenter'
+    call PluginNerdcommenterConfig()
+
+    "----------------------------------------------------------------------------------------------------------------------------------------
+    "快捷建显示和构建
+    "----------------------------------------------------------------------------------------------------------------------------------------
+    Plug 'skywind3000/quickmenu.vim'  "refer to the Initquickmenu()
+
+
+    "----------------------------------------------------------------------------------------------------------------------------------------
+    "括号匹配高亮/hl
+    "----------------------------------------------------------------------------------------------------------------------------------------
+    Plug 'luochen1990/rainbow'   "Plug 'kien/rainbow_parentheses.vim' this plugin is useless, it is worse than by rainbow
+    let g:rainbow_active=1"
+
+    "----------------------------------------------------------------------------------------------------------------------------------------
+    ">tabular是一个帮你用像=,,这种符号来对齐一些文本的插件。当你在编写json或者有许多变量的代码 时非常有用
+    "----------------------------------------------------------------------------------------------------------------------------------------
+    Plug 'godlygeek/tabular'
+    "----------------------------------------------------------------------------------------------------------------------------------------
+    ">md文件语法高亮和文件类型检测
+    "----------------------------------------------------------------------------------------------------------------------------------------
+    Plug 'plasticboy/vim-markdown'
+    let g:vim_markdown_folding_disabled=1
+    let g:vim_markdown_toc_autofit=1
+
+    "----------------------------------------------------------------------------------------------------------------------------------------
+    "其他语言扩展插件
+    "----------------------------------------------------------------------------------------------------------------------------------------
+    ">C函数的辅助插件
+    Plug 'exvim/ex-cref'
+    ">vim-jsbeautify包括html,css,javascript缩进和语法高亮功能。我没用它所以没有建议
+    "Plug 'maksimr/vim-jsbeautify'
+    Plug 'fatih/vim-go'
+    "vim-autoformat，比如c++，会自动调用诸如astyle, clang-format来对代码进行美化
+    Plug 'Chiel92/vim-autoformat'
+    call plug#end()
+endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function InitPreEnv()
@@ -844,13 +604,10 @@ func InitNewfile()
 endfunc
 
 function InitMapping()
-    "键盘命令"{{{
+    "Map"{{{
     """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     map! <C-O> <C-Y>,
     map <C-A> ggVG$"+y
-    "switch the c and h file
-    nnoremap <silent> <F12> :AV<CR>
-    "map <F12> gg=G
     map <C-w> <C-w>w
     " 选中状态下 Ctrl+c 复制
     "map <C-v> "*pa
@@ -862,6 +619,7 @@ function InitMapping()
     nnoremap <F2> :g/^\s*$/d<CR>
 
     map <F6> :call FormartSrc()<CR><CR>
+    noremap <silent><F12> :map<cr>
     "}}}
 endfunc
 
@@ -911,9 +669,248 @@ function InitBufexplore()
     endif
     " 设置当文件被改动时自动载入
     set autoread
-    "quit the win:ALT+F11
-    nmap<M-F11> :q!<CR>"}}}
+    "quit the win:ALT+F3
+    nmap<M-F3> :q!<CR>"}}}
 endfunc
+
+function LoadingCscopeTags(tagsdir)"{{{
+"if has('cscope')
+    call SetupCscopeEnv()
+    if filereadable(a:tagsdir . 'cscope.out')
+        let cscope_file=findfile('cscope.out', '.;')
+        let cscope_path=matchstr('cscope.out', a:tagsdir)
+        if  !filereadable(cscope_file)
+            call Echo("NO cscope to be found")
+            return 0
+        endif
+
+        if executable('cscope')
+            call Echo("cscope is available")
+            call Echo("Add cscope:" . cscope_path . cscope_file)
+            exe "cs add" cscope_file cscope_path
+        elseif
+            call Echo("cscope is disable")
+            return 0
+        endif
+
+    endif
+    if filereadable(a:tagsdir . 'tags')
+        if executable('ctags')
+            call Echo("ctags is available")
+            execute 'set tags =' . a:tagsdir . 'tags'
+            call Echo("Add ctags:" . a:tagsdir . 'tags')
+        elseif
+            call Echo("ctags is disable")
+            return 0
+        endif
+    endif
+    return 1
+endfunction"}}}
+function! SetupCscopeEnv() "{{{
+    " Disable gtags temporary
+    "csto：命令的查找次序，默认为0，0为从cscope开始，1为从ctags开始,cscopetagorder==csto
+    set csto=0
+    "是否用cscope代替ctags，在需要使用tag文件的时候，比如:tag命令和<C-]>命令 , cscopetag == cst
+    set cst
+    "是否告之数据库加载结果
+    set nocsverb
+    ""cspc decide the length of path,cscopepathcomp==cspc
+    set cspc=0
+    "cscopequickfix：设置quickfix窗口里显示的选项，+代表添加到quickfix窗口，-代表清楚上次选项，0代表不添加
+    set cscopequickfix=s0,c0,d0,i0,t0,e0
+    "cscopeprg==csprg
+    set csprg=/usr/bin/cscope
+endfunction "}}}
+function! CleanupCscopeEnv() "{{{
+endfunction "}}}
+function! FindFiles(pat, ...)"{{{
+     let path = ''
+     for str in a:000
+         let path .= str . ','
+     endfor
+
+     if path == ''
+         let path = &path
+     endif
+
+     call Echo('finding...')
+     redraw
+     call append(line('$'), split(globpath(path, a:pat), '\n'))
+     call Echo('finding...done!')
+     redraw
+endfunc"}}}
+function! UpdatingGtags(f)"{{{
+     let dir = fnamemodify(a:f, ':p:h')
+     "坚决不用gtags -u这个命令有很大的弊端　　会产生很多小的进程在后台　所以基本上这个命令也被gtags官方都否认了
+     "exe 'silent !cd ' . dir . ' && gtags -i '
+     "exe 'silent !cd ' . dir . ' && gtags -i &> /dev/null &'
+     exe 'silent !cd ' . dir . ' && gtags --single-update 'a:f' &> /dev/null &'
+     call Echo("GTAGS Updateing:"a:f)
+ endfunction"}}}
+function! SetupUpdatingGtags()"{{{
+    "command! -nargs=+ -complete=dir FindFiles :call FindFiles(<f-args>)
+    au BufWritePost *.[ch] call UpdatingGtags(expand('<afile>'))
+endfunc"}}}
+function! LoadingGtags(tagsdir)"{{{
+    if filereadable(a:tagsdir . 'GTAGS')
+        let tags_file="GTAGS"
+        let tags_path=a:tagsdir
+        if executable('gtags-cscope')
+            call SetupGtagsEnv(a:tagsdir)
+            call SetupGtagsMappings()
+            call SetupUpdatingGtags()
+            call Echo("Loading GTAGS:". a:tagsdir . 'GTAGS')
+            exe "cs add " . a:tagsdir . 'GTAGS'
+        elseif
+            call Echo("Please Install gtags-cscope")
+            return 0
+        endif
+        return 1
+    endif
+    call Echo("Not found GTAGS in ",a:tagsdir)
+endfunction"}}}
+function! SetupGtagsEnv(tagsdir) "{{{
+    "" Treat 'h' file as c++ type for gtags
+    "let $GTAGSFORCECPP = 1 
+    "let project_path=getcwd()
+    "get the father dir,remove the .tags_dir
+    let project_path=substitute(expand(a:tagsdir), '\(\.tags_dir\/\)', '', '')
+    " Set the root of source tree for gtags, this config can locate your file path
+    let $GTAGSROOT = project_path
+    " Set the directory on which tag files exists,this config will help you to add the tags
+    "let $GTAGSDBPATH = expand("%:p:h") . '/.tags_dir'
+    let $GTAGSDBPATH = a:tagsdir
+    call Echo("GTAGSROOT=",$GTAGSROOT)
+    call Echo("GTAGSDBPATH=",$GTAGSDBPATH)
+
+    set csto=0
+    set cst
+    set cspc=0
+    "set cscopequickfix=c-,d-,e-,f-,g0,i-,s-,t-
+    set cscopequickfix=s0,c0,d0,i0,t0,e0
+    set csprg=gtags-cscope "csprg==cscopeprg
+
+    " To use the default key/mouse mapping:
+    "	let g:GtagsCscope_Auto_Map = 1
+    " To ignore letter case when searching:
+    "	let g:GtagsCscope_Ignore_Case = 1
+    " To use absolute path name:
+    "       let g:GtagsCscope_Absolute_Path = 1
+    " To deterring interruption:
+    "	let g:GtagsCscope_Keep_Alive = 1
+    " If you hope auto loading:
+    "	let GtagsCscope_Auto_Load = 1
+    " To use 'vim -t ', ':tag' and '<C-]>'
+    "	set cscopetag
+    let g:GtagsCscope_Auto_Load = 1
+    let g:GtagsCscope_Auto_Map = 1
+    let g:GtagsCscope_Absolute_Path = 1
+endfunction "}}}
+function! CleanupGtagsEnv() "{{{
+    " Treat 'h' file as c++ type for gtags
+    set cscopeprg&
+    let $GTAGSFORCECPP=""
+    let $GTAGSROOT=""
+    let $GTAGSDBPATH=""
+endfunction "}}}
+function! Echo(msg,...)"{{{
+    "Title ErrorMsg WarningMsg
+    echohl Title 
+    ""ErrorMsg represent the red color
+    ""if the funciton name is s:echo,this is the droid you're looking for
+    ""echo substitute(expand('<sfile>'), '.*\(\.\.\|\s\)', '', '')
+    "" compare with this (not what you want, just for reference)
+    "echo expand('<sfile>')
+    let index = 1
+    let msg_all="[-vimrc-]".a:msg
+    while index <= a:0
+        let msg_all=msg_all . a:{index} 
+        let index = index + 1
+    endwhile
+    "echo printf("%s",msg_all)
+    echo printf("%-100.100s",msg_all)
+    let stack_msg=substitute(expand('<sfile>'), '\(\.\.\Echo\)', '', '')
+    echon "["substitute(expand(stack_msg), '\(\function \)', '', '')"]"
+    echo ""
+    echohl None
+endfunction"}}}
+function! FindingTagsDir()"{{{
+    let maxdepth = 4
+    "call Echo("VimOPenFile",expand('<afile>'))
+    let VimOpenPath=expand("%:p:h")
+    call Echo("OpenPath=" . VimOpenPath)
+    let dir =getcwd()
+    let i = 0
+    while i < maxdepth
+        let dir=simplify(dir)
+        let tags_dir_path=dir . '/.tags_dir/'
+        if filereadable(dir . '/GTAGS')
+            call Echo("Finding GTAGS: ".dir)
+            if executable('gtags-cscope')
+                call LoadingGtags(dir . '/')
+                break
+            elseif executable('cscope')
+                call LoadingCscopeTags(dir)
+                break
+            endif
+        endif
+
+        if isdirectory(tags_dir_path)
+            call Echo("Finding .tags_dir:". tags_dir_path)
+            if executable('gtags-cscope')
+                call LoadingGtags(tags_dir_path)
+                break
+            elseif executable('cscope')
+                call LoadingCscopeTags(tags_dir_path)
+                break
+            endif
+        endif
+
+        let dir = dir . '/..'
+        let i = i + 1
+        if i == maxdepth
+            call Echo("Not found .tags_dir")
+        endif
+    endwhile
+endfunction"}}}
+function! PluginGtagsConfig()"{{{
+    call FindingTagsDir()
+endfunction"}}}
+
+function SetupGtagsMappings()"{{{
+    nmap <silent> <leader>j <ESC>:cstag <c-r><c-w><CR>
+    nmap <silent> <leader>g <ESC>:lcs f c <c-r><c-w><cr>:lw<cr>
+    nmap <silent> <leader>s <ESC>:lcs f s <c-r><c-w><cr>:lw<cr>
+    "command! -nargs=+ -complete=dir FindFiles :call FindFiles(<f-args>)
+    au BufWritePost *.[ch] call UpdatingGtags(expand('<afile>'))
+endfunc"}}}
+
+"Show the shortcuts info in the quickmenu
+function! Initquickmenu()"{{{
+    call quickmenu#current(0)
+    call quickmenu#reset()
+    " choose a favorite key to show/hide quickmenu
+    noremap <silent><F12> :call g:quickmenu#toggle(0)<cr>
+    " enable cursorline (L) and cmdline help (H)
+    let g:quickmenu_options = "HL"
+
+    " section 1, text starting with "#" represents a section (see the screen capture below)
+    call g:quickmenu#append('# Bufexplore', '')
+
+    call g:quickmenu#append('item 1.1', 'echo "1.1 is selected"', 'select item 1.1')
+    call g:quickmenu#append('item 1.2', 'echo "1.2 is selected"', 'select item 1.2')
+    call g:quickmenu#append('item 1.3', 'echo "1.3 is selected"', 'select item 1.3')
+
+    " section 2
+    call g:quickmenu#append('# Misc', '')
+
+    call g:quickmenu#append('item 2.1', 'echo "2.1 is selected"', 'select item 2.1')
+    call g:quickmenu#append('item 2.2', 'echo "2.2 is selected"', 'select item 2.2')
+    call g:quickmenu#append('item 2.3', 'echo "2.3 is selected"', 'select item 2.3')
+    call g:quickmenu#append('item 2.4', 'echo "2.4 is selected"', 'select item 2.4')
+    "call quickmenu#append('Function list', 'call Toggle_Tagbar()', 'show/hide tagbar')
+endfunction
+"}}}
 
 function InitPostEnv()
     "some delay config"{{{
@@ -934,9 +931,13 @@ function InitPostEnv()
     "hi TAB ctermbg=red  guibg=red
     "syn match Trail /\v\*\=/
     "syn match TAB /\t/"}}}
-    autocmd VimEnter * echohl ErrorMsg | echomsg "Usually Cmds: cs show" | echohl None
+    "autocmd VimEnter * echohl ErrorMsg | echomsg "Usually Cmds: cs show" | echohl None
+   "autocmd VimEnter * silent cs show <ESC><CR><ESC>
+   call InitMapping()
+   "call Initquickmenu()
 endfunction
 
+call Plug_manage()
 call InitPreEnv()
 call InitTABEnv()
 call InitVimColorEnv()
@@ -944,8 +945,7 @@ call InitVimSizeEnv()
 call InitBufexplore()
 call InitMatchComplete()
 call InitFoldEnv()
-"call InitStatusbarEnv()
 call InitNewfile()
-call InitFontEnv()
-call InitMapping()
+"call InitFontEnv()
+call PluginGtagsConfig()
 call InitPostEnv()
