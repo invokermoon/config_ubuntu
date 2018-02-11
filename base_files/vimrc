@@ -291,11 +291,11 @@ endfunction
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function InitPreEnv()
     "一般设置"{{{
-    set report=0
+    set report=0 "屏蔽声音
     set noswapfile
     set autowrite
     set shortmess=atI " 启动的时候不显示那个援助乌干达儿童的提示
-    set go= " 不要图形按钮，工具栏
+    "set go= " 不要图形按钮，工具栏
     set showcmd " 输入的命令显示出来，看的清楚些
     set history=1000
     "set mouse=a
@@ -309,26 +309,22 @@ function InitPreEnv()
 endfunction
 
 function InitTABEnv()
-    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-    ""tab config"{{{
     "对于已保存的文件，可以使用下面的方法进行空格和TAB的替换：
     "TAB替换为空格：
     ":set ts=4
     ":set expandtab
     ":%retab!
-    "
     "空格替换为TAB：
     ":set ts=4
     ":set noexpandtab
     ":%retab!
-    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-    set tabstop=4"{{{
+    set tabstop=4
     set shiftwidth=4
-    "set noexpandtab
-    set expandtab
+    set noexpandtab
+    "set expandtab
     set smarttab
     "将tab替换为空格
-    "nmap tt :%s/\t/ /g<CR>"}}}"}}}
+    "nmap tt :%s/\t/ /g<CR>
 endfunction
 
 function InitVimSizeEnv()
@@ -673,6 +669,27 @@ function InitBufexplore()
     nmap<M-F3> :q!<CR>"}}}
 endfunc
 
+function! Echo(msg,...)"{{{
+    "Title ErrorMsg WarningMsg
+    echohl Title 
+    ""ErrorMsg represent the red color
+    ""if the funciton name is s:echo,this is the droid you're looking for
+    ""echo substitute(expand('<sfile>'), '.*\(\.\.\|\s\)', '', '')
+    "" compare with this (not what you want, just for reference)
+    "echo expand('<sfile>')
+    let index = 1
+    let msg_all="[-vimrc-]".a:msg
+    while index <= a:0
+        let msg_all=msg_all . a:{index} 
+        let index = index + 1
+    endwhile
+    "echo printf("%s",msg_all)
+    echo printf("%-100.100s",msg_all)
+    let stack_msg=substitute(expand('<sfile>'), '\(\.\.\Echo\)', '', '')
+    echon "["substitute(expand(stack_msg), '\(\function \)', '', '')"]"
+    echo ""
+    echohl None
+endfunction"}}}
 function LoadingCscopeTags(tagsdir)"{{{
 "if has('cscope')
     call SetupCscopeEnv()
@@ -745,7 +762,7 @@ function! UpdatingGtags(f)"{{{
      "exe 'silent !cd ' . dir . ' && gtags -i '
      "exe 'silent !cd ' . dir . ' && gtags -i &> /dev/null &'
      exe 'silent !cd ' . dir . ' && gtags --single-update 'a:f' &> /dev/null &'
-     call Echo("GTAGS Updateing:"a:f)
+     call Echo("GTAGS Updateing:" . a:f)
  endfunction"}}}
 function! SetupUpdatingGtags()"{{{
     "command! -nargs=+ -complete=dir FindFiles :call FindFiles(<f-args>)
@@ -813,27 +830,6 @@ function! CleanupGtagsEnv() "{{{
     let $GTAGSROOT=""
     let $GTAGSDBPATH=""
 endfunction "}}}
-function! Echo(msg,...)"{{{
-    "Title ErrorMsg WarningMsg
-    echohl Title 
-    ""ErrorMsg represent the red color
-    ""if the funciton name is s:echo,this is the droid you're looking for
-    ""echo substitute(expand('<sfile>'), '.*\(\.\.\|\s\)', '', '')
-    "" compare with this (not what you want, just for reference)
-    "echo expand('<sfile>')
-    let index = 1
-    let msg_all="[-vimrc-]".a:msg
-    while index <= a:0
-        let msg_all=msg_all . a:{index} 
-        let index = index + 1
-    endwhile
-    "echo printf("%s",msg_all)
-    echo printf("%-100.100s",msg_all)
-    let stack_msg=substitute(expand('<sfile>'), '\(\.\.\Echo\)', '', '')
-    echon "["substitute(expand(stack_msg), '\(\function \)', '', '')"]"
-    echo ""
-    echohl None
-endfunction"}}}
 function! FindingTagsDir()"{{{
     let maxdepth = 4
     "call Echo("VimOPenFile",expand('<afile>'))
@@ -876,13 +872,11 @@ endfunction"}}}
 function! PluginGtagsConfig()"{{{
     call FindingTagsDir()
 endfunction"}}}
-
 function SetupGtagsMappings()"{{{
     nmap <silent> <leader>j <ESC>:cstag <c-r><c-w><CR>
     nmap <silent> <leader>g <ESC>:lcs f c <c-r><c-w><cr>:lw<cr>
     nmap <silent> <leader>s <ESC>:lcs f s <c-r><c-w><cr>:lw<cr>
     "command! -nargs=+ -complete=dir FindFiles :call FindFiles(<f-args>)
-    au BufWritePost *.[ch] call UpdatingGtags(expand('<afile>'))
 endfunc"}}}
 
 "Show the shortcuts info in the quickmenu
