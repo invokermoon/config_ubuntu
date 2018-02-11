@@ -163,6 +163,7 @@ endfunction
 
 "How to use vim-plug
 "curl -fLo ~/.local/share/nvim/site/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+"curl -fLo ~/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 function! Plug_manage()
     "vim-plugin 最好　其他什么vundle 就是一坨屎
     call plug#begin('~/.vim/plugged')

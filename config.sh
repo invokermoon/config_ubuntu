@@ -119,8 +119,11 @@ config_vimrc()
 	fi
 	#install $vimrc_file $user_home/.vimrc
     ln -sf $vimrc_file $user_home/.vimrc
-	#Setup the Vundle
-	#git clone https://github.com/gmarik/Vundle.vim.git ~/.vim/bundle/Vundle.vim
+	#Setup the Plugin
+    if [ -f "$user_home/.vim/autoload/plug.vim" ]; then
+		echo -e "\033[32m[Dowloading the plugin...]\033[0m"
+		curl -fLo ~/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+	fi
 	chown -R $user_name: $user_home/.vimrc
     print_result $FUNCNAME "ok"
 }
@@ -141,7 +144,9 @@ config_ssh()
 	#cp $ssh_dir/* $ssh_home/ -rf
 	ln -sf $ssh_dir $ssh_home
 	chown -R $user_name: $ssh_home
-	echo -e "$color_brown You should enable ssh by $color_red ssh-add $color_white"
+	chmod 0600 ~/.ssh/id_rsa
+	ssh-add
+	#echo -e "$color_brown You should enable ssh by $color_red ssh-add $color_white"
     print_result $FUNCNAME "ok"
 
 }
@@ -408,7 +413,8 @@ setup_base_tools()
     is_user_root;
     echo -e "\033[32m[Installing base software...]\033[0m"
     apt-get update
-    apt-get install git samba ssh vim-common vim-gtk cscope;
+	apt-get install autoconf pkg-config gperf flex bison libncurses5-dev libdbus-1-dev libnss3
+    apt-get install git samba ssh vim-common vim-gtk cscope autoconf automake libtool libffi-dev  ncurses-dev python python-dev;
     print_result $FUNCNAME "ok"
 }
 
@@ -428,12 +434,11 @@ setup_post_tools()
     fi
 
 	echo -e "\033[32m[Installing base build dependencies...]\033[0m"
-	apt-get install python gawk git-core diffstat unzip zip texinfo gcc-multilib \
-		build-essential chrpath libtool libc6:i386 doxygen graphviz tmux     \
+	apt-get install gawk git-core diffstat unzip zip texinfo gcc-multilib \
+		build-essential chrpath libc6:i386 doxygen graphviz tmux     \
 		libc6-dev-i386 uncrustify mscgen vim-common pigz libdbus-1-dev \
 		libglib2.0-dev
 	echo -e "\033[32m[Installing kconfig front-ends dependencies...]\033[0m"
-	apt-get install autoconf pkg-config gperf flex bison libncurses5-dev
 	echo -e "\033[32m[Installing protobuf compiler dependencies...]\033[0m"
 	apt-get install protobuf-compiler python-protobuf
 	echo -e "\033[32m[Installing qemu emulator dependencies...]\033[0m"
@@ -497,6 +502,11 @@ config_uctags()
     #we need to know there are 2 tags:
     #1.Exuberant Ctags: this is stoping  to maintain. we discard it.[install :sudo apt-get install exuberant-ctags)
     #2.Universal ctags: this is more powerful and updating.[install:  by us]
+	ret=`ctags --version | grep "Universal Ctags"`
+	if [ ! -z "$ret"  ]; then
+        print_result $FUNCNAME "ok"
+		return
+	fi
     skip_this_step $FUNCNAME
     if [ $? == 1 ] ; then
         return
@@ -529,6 +539,11 @@ config_uctags()
 config_global()
 {
     config_uctags;
+	type global
+	if [ $? == 0 ]; then
+        print_result $FUNCNAME "ok"
+		return
+	fi
     skip_this_step $FUNCNAME
     if [ $? == 1 ] ; then
         return
@@ -575,7 +590,7 @@ main()
     create_backdir
     setup_base_tools
 	config_vimrc;
-	config_vimdir;
+	#config_vimdir;
 	config_ssh;
 	config_git;
 	config_bin;
