@@ -25,7 +25,7 @@ usage()
 
 ignore_targets="bin|tools"
 #find_types="\( -name \*.c -o -name \*.cpp -o -name \*.cc -o -name \*.hpp -o -name \*.h -o -name \*.asm -o -name \*.def \)"
-find_types='-name "*.c" -o -name "*.cpp" -o -name "*.dtsi"-o -name "*.hpp" -o -name "*.h" -o -name "*.asm" -o -name "*.dts"'
+find_types='-name "*.c" -o -name "*.cpp" -o -name "*.dtsi" -o -name "*.hpp" -o -name "*.h" -o -name "*.asm" -o -name "*.dts"'
 find_types1='-name "*.cmd" -o  -name "*.c" -o -name "*.cpp" -o -name "*.java" -o -name "*.h" -o -name "Makefile" -o -name "*.go"  -o -name "*conf*" -o -name "*vpf" -o -name "*.S" -o -name "*.s"'
 git_types=".c$|.cpp$|.h$|.hpp$"
 git_branch=master
@@ -181,7 +181,7 @@ build_global()
 {
     #printf "[+]$color_yellow Show the Gnu-global env:$color_LIGHT_RED\n"
     #gtags --config
-    printf "$color_white[+] Building GNU Global database...\n"
+    printf "$color_green[+] Building GNU Global database...\n"
     #gtags -f $reference_tagsfile $tags_dir --accept-dotfiles
     gtags -f $reference_tagsfile $tags_dir --accept-dotfiles
     #cp -pf GPATH GRTAGS GTAGS $tags_dir 2>/dev/null

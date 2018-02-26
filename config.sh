@@ -413,9 +413,48 @@ setup_base_tools()
     is_user_root;
     echo -e "\033[32m[Installing base software...]\033[0m"
     apt-get update
-	apt-get install autoconf pkg-config gperf flex bison libncurses5-dev libdbus-1-dev libnss3
+	apt-get install autoconf pkg-config gperf flex bison libncurses5-dev libdbus-1-dev libnss3 gtk2-engines-murrine ibus-libpinyin
     apt-get install git samba ssh vim-common vim-gtk cscope autoconf automake libtool libffi-dev  ncurses-dev python python-dev;
+    apt-get install libgl1-mesa-dev libgegl-dev;
+    echo -e "$color_red Using:apt-cache search XXX-dev to find libs $color_white"
     print_result $FUNCNAME "ok"
+}
+
+setup_gedit_encoding()
+{
+    skip_this_step $FUNCNAME
+    if [ $? == 1 ] ; then
+       return
+    fi
+
+    is_user_root;
+    echo -e "\033[32m[解决gedit乱麻问题...]\033[0m"
+	gsettings set org.gnome.gedit.preferences.encodings auto-detected "['GB18030', 'UTF-8', 'CURRENT', 'ISO-8859-15', 'UTF-16']"
+	if [ $? ==  1 ]; then
+		settings set org.gnome.gedit.preferences.encodings candidate-encodings "['GB18030', 'UTF-8', 'CURRENT', 'ISO-8859-15', 'UTF-16']"
+	fi
+	print_result $FUNCNAME "ok"
+}
+
+settup_new_themes()
+{
+    skip_this_step $FUNCNAME
+    if [ $? == 1 ] ; then
+       return
+    fi
+
+    is_user_root;
+    echo -e "\033[32m[添加themes工具unity-tweak-tool...]\033[0m"
+	sudo  apt-get  install unity-tweak-tool
+    echo -e "\033[32m[添加themes Flatabulous...]\033[0m"
+	sudo add-apt-repository ppa:noobslab/themes
+	sudo add-apt-repository ppa:noobslab/icons
+	sudo apt-get update
+	sudo apt-get install flatabulous-theme
+	sudo apt-get install ultra-flat-icons
+    echo -e "\033[32m[添加themes ambiance-crunchy  ambiance-lime...]\033[0m"
+	sudo apt-get install ambiance-crunchy  ambiance-lime
+	print_result $FUNCNAME "ok"
 }
 
 check_tools_version()
@@ -599,5 +638,7 @@ main()
     config_global;
     #setup_post_tools;
 	config_terminal_tab_color;
+	setup_gedit_encoding;
+	settup_new_themes;
 }
 main $@;
